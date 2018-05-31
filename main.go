@@ -37,6 +37,10 @@ func main() {
 			fmt.Println("pcapcat <infile> [<infile>...]")
 			os.Exit(0)
 		}
+		if pcapPath == "-v" || pcapPath == "--version" {
+			fmt.Println("v0.1.0")
+			os.Exit(0)
+		}
 
 		f, _ := os.Open(pcapPath)
 		defer f.Close()
