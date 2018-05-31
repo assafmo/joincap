@@ -26,19 +26,17 @@ func main() {
 	w := pcapgo.NewWriter(os.Stdout)
 
 	if len(os.Args) < 2 {
-		fmt.Println("pcapcat <infile> [<infile>...]")
+		fmt.Println("joincap v0.1.0")
+		fmt.Println("Usage: joincap <infile> [<infile>...]")
 		os.Exit(1)
 	}
 
 	var snaplen uint32
 	var linkType layers.LinkType
 	for _, pcapPath := range os.Args[1:] {
-		if pcapPath == "-h" || pcapPath == "--help" {
-			fmt.Println("pcapcat <infile> [<infile>...]")
-			os.Exit(0)
-		}
-		if pcapPath == "-v" || pcapPath == "--version" {
-			fmt.Println("v0.1.0")
+		if pcapPath == "-h" || pcapPath == "--help" || pcapPath == "-v" || pcapPath == "--version" {
+			fmt.Println("joincap v0.1.0")
+			fmt.Println("Usage: joincap <infile> [<infile>...]")
 			os.Exit(0)
 		}
 

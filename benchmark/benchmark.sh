@@ -16,7 +16,7 @@ fi
 
 # mount tmpfs
 mkdir -p ./_tmpfs/
-sudo mount -t tmpfs -o size=1G tmpfs ./_tmpfs/
+sudo mount -t tmpfs -o size=4G tmpfs ./_tmpfs/
 
 # copy pcaps to tmpfs
 cp *.pcap ./_tmpfs/
@@ -31,6 +31,8 @@ tcpslice --version
 echo joincap version:
 joincap --version
 
-# time joincap *pcap > /dev/null
-# time mergecap -w - *pcap > /dev/null
-# time tcpslice -w - *pcap > /dev/null
+time joincap *pcap > /dev/null
+time mergecap -w - *pcap > /dev/null
+time tcpslice -w - *pcap > /dev/null
+
+sudo umount _tmpfs
