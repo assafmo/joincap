@@ -22,17 +22,20 @@ sudo mount -t tmpfs -o size=4G tmpfs ./_tmpfs/
 cp *.pcap ./_tmpfs/
 
 # print versions for joincap, mergecap, tcpslice
-echo mergecap version:
+echo mergecap:
 mergecap --version
+time mergecap -w - *pcap | pv > /dev/null
 
-echo tcpslice version:
+echo
+echo tcpslice:
 tcpslice --version
+time tcpslice -w /dev/stdout *pcap | pv > /dev/null
 
-echo joincap version:
+echo
+echo joincap:
 joincap --version
+time joincap *pcap | pv > /dev/null
 
-time joincap *pcap > /dev/null
-time mergecap -w - *pcap > /dev/null
-time tcpslice -w - *pcap > /dev/null
 
 sudo umount _tmpfs
+rm -rf _tmpfs
