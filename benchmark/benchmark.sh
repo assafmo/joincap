@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# wget pcaps...
+# mount tmpfs...
+# copy pcaps to tmpfs...
+# print versions for joincap, mergecap, tcpslice
+# joincap *pcap > /dev/null
+# mergecap *pcap > /dev/null
+# tcpslice *pcap > /dev/null
