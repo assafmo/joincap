@@ -6,7 +6,7 @@ Merge multiple pcap files together.
 
 `TODO: tcpslice dies when can't find the last packet?`  
 `TODO: mergecap dies on every corrupt packet/header?`  
-I think skipping corrupt packets is better than failing the whole merge.
+I think skipping corrupt packets is better than failing the entire merge job.
 
 ## Install
 
