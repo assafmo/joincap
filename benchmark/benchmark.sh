@@ -4,6 +4,6 @@
 # mount tmpfs...
 # copy pcaps to tmpfs...
 # print versions for joincap, mergecap, tcpslice
-# joincap *pcap > /dev/null
-# mergecap *pcap > /dev/null
-# tcpslice *pcap > /dev/null
+# time joincap *pcap > /dev/null
+# time mergecap -w - *pcap > /dev/null
+# time tcpslice -w - *pcap > /dev/null
