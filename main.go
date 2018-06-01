@@ -59,7 +59,6 @@ func main() {
 
 		data, captureInfo, err := pcapReader.ReadPacketData()
 		if err == nil && err != io.EOF {
-			// log.Fatalln("Error reading file", pcapPath, ":", err)
 			h.Push(Packet{captureInfo, data, pcapReader})
 		}
 	}
@@ -79,7 +78,7 @@ func main() {
 				continue
 			}
 
-			// log.Fatalln("Error reading file", packet.Reader, ":", err)
+			// do nothing - skip errors - maybe log it?
 		}
 
 		h.Push(Packet{captureInfo, data, packet.Reader})
