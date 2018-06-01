@@ -30,7 +30,7 @@ func main() {
 	h := &PacketHeap{}
 	heap.Init(h)
 
-	w := pcapgo.NewWriter(bufio.NewWriterSize(os.Stdout, 1024*64))
+	w := pcapgo.NewWriter(bufio.NewWriter(os.Stdout))
 
 	if len(os.Args) < 2 {
 		fmt.Println("joincap v0.1.0")
