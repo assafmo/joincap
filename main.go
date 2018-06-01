@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"container/heap"
 	"fmt"
 	"io"
 	"log"
+	// "net/http"
+	// _ "net/http/pprof"
 	"os"
 
 	"github.com/google/gopacket/layers"
@@ -19,11 +22,15 @@ func max(x, y uint32) uint32 {
 }
 
 func main() {
+	// go func() {
+	// 	log.Println(http.ListenAndServe("localhost:8080", nil))
+	// }()
+
 	readers := make([]*pcapgo.Reader, 0)
 	h := &PacketHeap{}
 	heap.Init(h)
 
-	w := pcapgo.NewWriter(os.Stdout)
+	w := pcapgo.NewWriter(bufio.NewWriterSize(os.Stdout, 1024*64))
 
 	if len(os.Args) < 2 {
 		fmt.Println("joincap v0.1.0")
