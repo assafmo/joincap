@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # get pcaps
-wget -nc 'https://download.netresec.com/pcap/maccdc-2012/maccdc2012_00000.pcap.gz' 'https://download.netresec.com/pcap/maccdc-2012/maccdc2012_00001.pcap.gz' 'https://download.netresec.com/pcap/maccdc-2012/maccdc2012_00002.pcap.gz'
+wget -nc https://download.netresec.com/pcap/maccdc-2012/maccdc2012_0000{0,1,2}.pcap.gz
 
 # extract pcaps
 if [[ ! -f 0.pcap ]]; then 
@@ -24,17 +24,17 @@ cp *.pcap ./_tmpfs/
 # print versions for joincap, mergecap, tcpslice
 echo mergecap:
 mergecap --version
-time mergecap -w - *pcap | pv > /dev/null
+time mergecap -w - ./_tmpfs/*pcap | pv > /dev/null
 
 echo
 echo tcpslice:
 tcpslice --version
-time tcpslice -w /dev/stdout *pcap | pv > /dev/null
+time tcpslice -w /dev/stdout ./_tmpfs/*pcap | pv > /dev/null
 
 echo
 echo joincap:
 joincap --version
-time joincap *pcap | pv > /dev/null
+time joincap ./_tmpfs/*pcap | pv > /dev/null
 
 
 sudo umount _tmpfs
