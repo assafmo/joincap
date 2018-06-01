@@ -54,7 +54,7 @@ user    0m2.402s
 sys     0m3.683s
 
 joincap:
-joincap v0.1.0
+joincap v0.2.0
 Usage: joincap <infile> [<infile>...]
 3.00GiB 0:00:07 [ 397MiB/s]
 
