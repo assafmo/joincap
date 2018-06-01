@@ -36,6 +36,6 @@ echo joincap:
 joincap --version
 time joincap ./_tmpfs/*pcap | pv > /dev/null
 
-
-sudo umount _tmpfs
+sleep 3
+sudo umount -f _tmpfs
 rm -rf _tmpfs

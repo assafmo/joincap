@@ -38,27 +38,27 @@ Running on Linux 4.15.0-22-generic, with Intel(R) Core(TM) i5-8250U CPU @
 1.2.11.
 
 Built using gcc 7.3.0.
-3.25GiB 0:00:06 [ 506MiB/s]
+3.25GiB 0:00:05 [ 605MiB/s]
 
-real    0m6.571s
-user    0m4.801s
-sys     0m4.793s
+real    0m5.498s
+user    0m4.028s
+sys     0m4.233s
 
 tcpslice:
 Version 1.2a3
 Usage: tcpslice [-DdlRrt] [-w file] [start-time [end-time]] file ...
-3.00GiB 0:00:04 [ 708MiB/s]
+3.00GiB 0:00:03 [ 825MiB/s]
 
-real    0m4.337s
-user    0m2.955s
-sys     0m4.146s
+real    0m3.721s
+user    0m2.402s
+sys     0m3.683s
 
 joincap:
 joincap v0.1.0
 Usage: joincap <infile> [<infile>...]
-3.00GiB 0:00:41 [73.3MiB/s]
+3.00GiB 0:00:07 [ 397MiB/s]
 
-real    0m41.909s
-user    0m32.958s
-sys     0m51.939s
+real    0m7.737s
+user    0m12.115s
+sys     0m1.811s
 ```
