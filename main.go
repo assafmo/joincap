@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"io"
 	"log"
-	// "net/http"
-	// _ "net/http/pprof"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 
 	"github.com/google/gopacket/layers"
@@ -22,9 +22,9 @@ func max(x, y uint32) uint32 {
 }
 
 func main() {
-	// go func() {
-	// 	log.Println(http.ListenAndServe("localhost:8080", nil))
-	// }()
+	go func() {
+		log.Println(http.ListenAndServe("localhost:8080", nil))
+	}()
 
 	readers := make([]*pcapgo.Reader, 0)
 	h := &PacketHeap{}
@@ -32,9 +32,11 @@ func main() {
 
 	w := pcapgo.NewWriter(bufio.NewWriter(os.Stdout))
 
+	helpMessage := `joincap v0.2.0
+Usage: joincap <infile> [<infile>...]`
+
 	if len(os.Args) < 2 {
-		fmt.Println("joincap v0.1.0")
-		fmt.Println("Usage: joincap <infile> [<infile>...]")
+		fmt.Println(helpMessage)
 		os.Exit(1)
 	}
 
@@ -42,8 +44,7 @@ func main() {
 	var linkType layers.LinkType
 	for _, pcapPath := range os.Args[1:] {
 		if pcapPath == "-h" || pcapPath == "--help" || pcapPath == "-v" || pcapPath == "--version" {
-			fmt.Println("joincap v0.1.0")
-			fmt.Println("Usage: joincap <infile> [<infile>...]")
+			fmt.Println(helpMessage)
 			os.Exit(0)
 		}
 
