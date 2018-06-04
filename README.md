@@ -2,9 +2,20 @@
 
 Merge multiple pcap files together.
 
-## tcpslice vs mergecap vs joincap
+## Why?
 
-I believe skipping corrupt packets is better than failing the entire merge job.
+I believe skipping corrupt packets is better than failing the entire merge job.  
+When using `tcpslice` or `mergecap` sometimes `pcapfix` is also needed:
+
+1.  One option is to try and run merge, if we get errors then run `pcapfix` on the bad pcaps and run merge again.  
+    This adds complexity, demends resources and possibly time.
+2.  Another option is to run `pcapfix` on each of the input pcap files and then run merge.  
+    This extends the total run time by a lot (Read and write each pcap twice instead of once) and demends more resources (`pcapfix` processes).
+3.  We can use `pcapfix` "in memory" with process substitution: `tcpslice -w out.pcap <(pcapfix -o /dev/stdout 1.pcap) <(pcapfix -o /dev/stdout 2.pcap)`.  
+    This also adds complexity and demends more resources (`pcapfix` processes).  
+    This also means it's harder for us to use pathname expansion (e.g. `tcpslice -w out.pcap *.pcap`) and we have to mind the command line character limit (in case of long pathnames).
+
+## tcpslice vs mergecap vs joincap
 
 | Use case                                                                                                       | tcpslice                                                                                                                                                         | mergecap                                                                                                                                                                     | joincap                                                               | example                                                                                         |
 | -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
