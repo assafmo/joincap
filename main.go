@@ -67,11 +67,17 @@ func main() {
 	var linkType layers.LinkType
 	for _, pcapPath := range restOfArgs[1:] {
 		f, err := os.Open(pcapPath)
-		dieOnError(err, pcapPath)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skiping)")
+			continue
+		}
 		defer f.Close()
 
 		pcapReader, err := pcapgo.NewReader(f)
-		dieOnError(err, pcapPath)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skiping)")
+			continue
+		}
 
 		readers = append(readers, pcapReader)
 
