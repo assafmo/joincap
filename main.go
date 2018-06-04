@@ -103,16 +103,18 @@ func main() {
 		}
 
 		// read the next packet from the written packet source
-		data, captureInfo, err := packet.Reader.ReadPacketData()
-		if err != nil {
-			if err == io.EOF {
-				continue
-			} else {
-				// skip errors
-				fmt.Fprintln(os.Stderr, err)
+		for {
+			data, captureInfo, err := packet.Reader.ReadPacketData()
+			if err != nil {
+				if err == io.EOF {
+					break
+				} else {
+					// skip errors
+					fmt.Fprintln(os.Stderr, err)
+				}
 			}
+			h.Push(Packet{captureInfo, data, packet.Reader})
+			break
 		}
-
-		h.Push(Packet{captureInfo, data, packet.Reader})
 	}
 }
