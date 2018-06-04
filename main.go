@@ -82,9 +82,18 @@ func main() {
 			log.Fatalln("Different LinkTypes:", linkType, pcapReader.LinkType())
 		}
 
-		data, captureInfo, err := pcapReader.ReadPacketData()
-		if err == nil && err != io.EOF {
-			h.Push(Packet{captureInfo, data, pcapReader})
+		for {
+			data, captureInfo, err := pcapReader.ReadPacketData()
+			if err != nil {
+				if err == io.EOF {
+					break
+				} else {
+					// skip errors
+					fmt.Fprintln(os.Stderr, err)
+				}
+			}
+			h.Push(Packet{captureInfo, data, pcapReader, pcapPath})
+			break
 		}
 	}
 
@@ -99,7 +108,7 @@ func main() {
 		err = pcapWriter.WritePacket(packet.CaptureInfo, packet.Data)
 		if err != nil {
 			// skip errors
-			fmt.Fprintln(os.Stderr, err)
+			fmt.Fprintln(os.Stderr, packet.PcapPath, err)
 		}
 
 		// read the next packet from the written packet source
@@ -110,10 +119,10 @@ func main() {
 					break
 				} else {
 					// skip errors
-					fmt.Fprintln(os.Stderr, err)
+					fmt.Fprintln(os.Stderr, packet.PcapPath, err)
 				}
 			}
-			h.Push(Packet{captureInfo, data, packet.Reader})
+			h.Push(Packet{captureInfo, data, packet.Reader, packet.PcapPath})
 			break
 		}
 	}

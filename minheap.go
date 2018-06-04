@@ -10,6 +10,7 @@ type Packet struct {
 	CaptureInfo gopacket.CaptureInfo
 	Data        []byte
 	Reader      *pcapgo.Reader
+	PcapPath    string
 }
 
 // PacketHeap is a minimum heap of packets by timestamp
