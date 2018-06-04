@@ -1,6 +1,6 @@
 # joincap
 
-Merge multiple pcap files together.
+Merge multiple pcap files together, gracefully.
 
 ## Why?
 
