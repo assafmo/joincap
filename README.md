@@ -7,15 +7,22 @@ Merge multiple pcap files together.
 I believe skipping corrupt packets is better than failing the entire merge job.  
 When using `tcpslice` or `mergecap` sometimes `pcapfix` is needed to fix bad input pcap files.
 
-1.  One option is to try and run merge (`mergecap`/`tcpslice`), if we get errors then run `pcapfix` on the bad pcaps and run merge again.  
-    This adds complexity, demends resources and possibly time.
-2.  Another option is to run `pcapfix` on each of the input pcap files and then run merge.  
-    This extends the total run time by a lot (read and write each pcap twice instead of once) and demends more resources (`pcapfix` processes and storage).
-3.  We can use `pcapfix` "in memory" with process substitution: `tcpslice -w out.pcap <(pcapfix -o /dev/stdout 1.pcap) <(pcapfix -o /dev/stdout 2.pcap)`.  
-    This also adds complexity and demends more resources (`pcapfix` processes).  
-    This also means it's harder for us to use pathname expansion (e.g. `tcpslice -w out.pcap *.pcap`) and we have to mind the command line character limit (in case of long pathnames).
+1.  One option is to try and run merge (`mergecap`/`tcpslice`), if we get errors then run `pcapfix` on the bad pcaps and then run merge again.
+    * Adds complexity (run -> check errors -> fix -> rerun)
+    * (If errors) Demends more resources (`pcapfix` processes)
+    * (If errors) Extends the total run time
+2.  Another option is to run `pcapfix` on each of the input pcap files and then merge.
+    * Extends the total run time by a lot (read and write each pcap twice instead of once)
+    * Demends more storage (for the fixed pcaps)
+    * Demends more resources (`pcapfix` processes)
+3.  We can use `pcapfix` "in memory" with process substitution: `mergecap -w out.pcap <(pcapfix -o /dev/stdout 1.pcap) <(pcapfix -o /dev/stdout 2.pcap)`.
+    * Adds complexity (build complex command line)
+    * Demends more resources (`pcapfix` processes)
+    * Harder for us to use pathname expansion (e.g. `tcpslice -w out.pcap *.pcap`)
+    * We have to mind the command line character limit (in case of long pathnames)
+    * Doesn't work for `tcpslice` (seeks the last packets to calculate time ranges - cannot do this with pipes)
 
-## tcpslice vs mergecap vs joincap
+## Error handling: `tcpslice` vs `mergecap` vs `joincap`
 
 | Use case                                                                                                       | tcpslice                                                                                                                                                         | mergecap                                                                                                                                                                     | joincap                                                               | example                                                                                         |
 | -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
