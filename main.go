@@ -12,7 +12,13 @@ import (
 
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcapgo"
+	"github.com/jessevdk/go-flags"
 )
+
+var opts struct {
+	Version        bool   `short:"v" long:"version" description:"Print version and exit"`
+	OutputFilePath string `short:"w" default:"-" description:"File to output the merged pcap"`
+}
 
 func max(x, y uint32) uint32 {
 	if x > y {
@@ -21,40 +27,50 @@ func max(x, y uint32) uint32 {
 	return y
 }
 
+func dieOnError(err error) {
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
 func main() {
 	go func() {
 		log.Println(http.ListenAndServe("localhost:8080", nil))
 	}()
 
+	restOfArgs, err := flags.ParseArgs(&opts, os.Args)
+	dieOnError(err)
+
+	if opts.Version {
+		fmt.Println("joincap v0.3.0")
+		os.Exit(0)
+	}
+
 	readers := make([]*pcapgo.Reader, 0)
 	h := &PacketHeap{}
 	heap.Init(h)
 
-	w := pcapgo.NewWriter(bufio.NewWriter(os.Stdout))
+	outputFile := os.Stdout
 
-	helpMessage := `joincap v0.2.0
-Usage: joincap <infile> [<infile>...]`
-
-	if len(os.Args) < 2 {
-		fmt.Println(helpMessage)
-		os.Exit(1)
+	if opts.OutputFilePath != "-" {
+		outputFile, err := os.Create(opts.OutputFilePath)
+		dieOnError(err)
+		defer outputFile.Close()
 	}
+	bufferedWriter := bufio.NewWriter(outputFile)
+	defer bufferedWriter.Flush()
+
+	pcapWriter := pcapgo.NewWriter(bufferedWriter)
 
 	var snaplen uint32
 	var linkType layers.LinkType
-	for _, pcapPath := range os.Args[1:] {
-		if pcapPath == "-h" || pcapPath == "--help" || pcapPath == "-v" || pcapPath == "--version" {
-			fmt.Println(helpMessage)
-			os.Exit(0)
-		}
-
-		f, _ := os.Open(pcapPath)
+	for _, pcapPath := range restOfArgs[1:] {
+		f, err := os.Open(pcapPath)
+		dieOnError(err)
 		defer f.Close()
 
 		pcapReader, err := pcapgo.NewReader(f)
-		if err != nil {
-			log.Fatal(err)
-		}
+		dieOnError(err)
 
 		readers = append(readers, pcapReader)
 
@@ -71,22 +87,29 @@ Usage: joincap <infile> [<infile>...]`
 		}
 	}
 
-	w.WriteFileHeader(snaplen, linkType)
+	pcapWriter.WriteFileHeader(snaplen, linkType)
 	for {
 		if h.Len() == 0 {
 			break
 		}
 
+		// find earliest packet to write
 		packet := h.Pop().(Packet)
-		w.WritePacket(packet.CaptureInfo, packet.Data)
+		err = pcapWriter.WritePacket(packet.CaptureInfo, packet.Data)
+		if err != nil {
+			// skip errors
+			fmt.Fprintln(os.Stderr, err)
+		}
 
+		// read the next packet from the written packet source
 		data, captureInfo, err := packet.Reader.ReadPacketData()
 		if err != nil {
 			if err == io.EOF {
 				continue
+			} else {
+				// skip errors
+				fmt.Fprintln(os.Stderr, err)
 			}
-
-			// do nothing - skip errors - maybe log it?
 		}
 
 		h.Push(Packet{captureInfo, data, packet.Reader})

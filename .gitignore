@@ -2,3 +2,4 @@
 *.gz
 *.pcap
 tmpfs
+debug
