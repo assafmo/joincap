@@ -5,7 +5,6 @@ import (
 	"container/heap"
 	"fmt"
 	"io"
-	"log"
 	// "net/http"
 	// _ "net/http/pprof"
 	"os"
@@ -101,7 +100,7 @@ func main() {
 		if linkType == layers.LinkTypeNull {
 			linkType = pcapReader.LinkType()
 		} else if linkType != pcapReader.LinkType() {
-			log.Fatalln("Different LinkTypes:", linkType, pcapReader.LinkType())
+			panic(fmt.Sprintln("Different LinkTypes:", linkType, pcapReader.LinkType()))
 		}
 
 		for {
