@@ -36,12 +36,14 @@ func main() {
 
 	restOfArgs, err := flags.ParseArgs(&opts, os.Args)
 
-	if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
-		// print version and help and exit
-		fmt.Println("joincap v" + version)
-		os.Exit(0)
-	} else {
-		panic(err)
+	if err != nil {
+		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
+			// print version and help and exit
+			fmt.Println("joincap v" + version)
+			os.Exit(0)
+		} else {
+			panic(err)
+		}
 	}
 
 	if opts.Version {
