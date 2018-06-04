@@ -2,3 +2,4 @@
 *.pcap*
 _tmpfs
 debug
+!examples/*.pcap
