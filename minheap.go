@@ -7,8 +7,8 @@ import (
 
 // Packet to be merged
 type Packet struct {
-	CaptureInfo gopacket.CaptureInfo
-	Data        []byte
+	CaptureInfo *gopacket.CaptureInfo
+	Data        *[]byte
 	Reader      *pcapgo.Reader
 	PcapPath    string
 }

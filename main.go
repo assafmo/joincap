@@ -114,7 +114,7 @@ func main() {
 					fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skiping this packet)")
 				}
 			}
-			h.Push(Packet{captureInfo, data, pcapReader, pcapPath})
+			h.Push(Packet{&captureInfo, &data, pcapReader, pcapPath})
 			break
 		}
 	}
@@ -127,7 +127,7 @@ func main() {
 
 		// find earliest packet and write in to the output file
 		packet := h.Pop().(Packet)
-		err = pcapWriter.WritePacket(packet.CaptureInfo, packet.Data)
+		err = pcapWriter.WritePacket(*packet.CaptureInfo, *packet.Data)
 		if err != nil && opts.Verbose {
 			// skip errors
 			fmt.Fprintln(os.Stderr, err, "(skiping this packet)")
@@ -145,7 +145,7 @@ func main() {
 					fmt.Fprintln(os.Stderr, packet.PcapPath+":", err, "(skiping this packet)")
 				}
 			}
-			h.Push(Packet{captureInfo, data, packet.Reader, packet.PcapPath})
+			h.Push(Packet{&captureInfo, &data, packet.Reader, packet.PcapPath})
 			break
 		}
 	}
