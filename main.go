@@ -16,8 +16,8 @@ import (
 )
 
 var opts struct {
-	Version        bool   `short:"v" long:"version" description:"Print version and exit"`
-	OutputFilePath string `short:"w" default:"-" description:"File to output the merged pcap"`
+	Version        bool   `short:"v" long:"version" description:"Print the version and exit."`
+	OutputFilePath string `short:"w" default:"-" description:"Sets the output filename. If the name is '-', stdout will be used."`
 }
 
 func max(x, y uint32) uint32 {
@@ -27,12 +27,7 @@ func max(x, y uint32) uint32 {
 	return y
 }
 
-func dieOnError(err error, path string) {
-	if err != nil {
-		fmt.Fprintln(os.Stderr, path)
-		panic(err)
-	}
-}
+const version = "0.4.0"
 
 func main() {
 	// go func() {
@@ -40,10 +35,18 @@ func main() {
 	// }()
 
 	restOfArgs, err := flags.ParseArgs(&opts, os.Args)
-	dieOnError(err, "")
+
+	if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
+		// print version and help and exit
+		fmt.Println("joincap v" + version)
+		os.Exit(0)
+	} else {
+		panic(err)
+	}
 
 	if opts.Version {
-		fmt.Println("joincap v0.4.0")
+		// print version and exit
+		fmt.Println("joincap v" + version)
 		os.Exit(0)
 	}
 
@@ -55,7 +58,10 @@ func main() {
 
 	if opts.OutputFilePath != "-" {
 		outputFile, err = os.Create(opts.OutputFilePath)
-		dieOnError(err, opts.OutputFilePath)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, opts.OutputFilePath+":")
+			panic(err)
+		}
 		defer outputFile.Close()
 	}
 	bufferedWriter := bufio.NewWriter(outputFile)
