@@ -89,7 +89,7 @@ func main() {
 					break
 				} else {
 					// skip errors
-					fmt.Fprintln(os.Stderr, pcapPath+":", err)
+					fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skiping this packet)")
 				}
 			}
 			h.Push(Packet{captureInfo, data, pcapReader, pcapPath})
@@ -108,7 +108,7 @@ func main() {
 		err = pcapWriter.WritePacket(packet.CaptureInfo, packet.Data)
 		if err != nil {
 			// skip errors
-			fmt.Fprintln(os.Stderr, err)
+			fmt.Fprintln(os.Stderr, err, "(skiping this packet)")
 		}
 
 		// read the next packet from the source of the written packet
@@ -120,7 +120,7 @@ func main() {
 					break
 				} else {
 					// skip errors
-					fmt.Fprintln(os.Stderr, packet.PcapPath+":", err)
+					fmt.Fprintln(os.Stderr, packet.PcapPath+":", err, "(skiping this packet)")
 				}
 			}
 			h.Push(Packet{captureInfo, data, packet.Reader, packet.PcapPath})
