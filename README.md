@@ -59,6 +59,8 @@ Help Options:
 
 ## Benchmarks
 
+**_TL;DR: `tcpslice` > `mergecap` > `joincap`._**
+
 ```
 mergecap:
 Mergecap (Wireshark) 2.4.5 (Git v2.4.5 packaged as 2.4.5-1)
