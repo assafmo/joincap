@@ -5,11 +5,12 @@ Merge multiple pcap files together.
 ## Why?
 
 I believe skipping corrupt packets is better than failing the entire merge job.
-| Use case | tcpslice | mergecap | joincap | example |
-| --- | --- | --- | --- | --- |
-| Corrupt global header | Dies with `tcpslice: bad tcpdump file examples/bad_global.pcap: archaic pcap savefile format` | Dies with `mergecap: The file "examples/bad_global.pcap" contains record data that mergecap doesn't support. (pcap: major version 0 unsupported)` | Dies with `examples/bad_global.pcap panic: Unknown major version 0` | `examples/bad_global.pcap` |
-| Corrupt packet header | Infinite loop? | Dies with `mergecap: The file "examples/bad_first_header.pcap" appears to be damaged or corrupt. (pcap: File has 2368110654-byte packet, bigger than maximum of 262144)` | Skips the packet and tries to find the next header | `examples/bad_first_header.pcap` |
-| Unexpectd EOF | Pads the last packet | Pads the last packet | Pads the last packet | `examples/unexpected_eof_on_first_packet.pcap`, `examples/unexpected_eof_on_second_packet.pcap` |
+
+| Use case              | tcpslice                                                                                      | mergecap                                                                                                                                                                 | joincap                                                             | example                                                                                         |
+| --------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Corrupt global header | Dies with `tcpslice: bad tcpdump file examples/bad_global.pcap: archaic pcap savefile format` | Dies with `mergecap: The file "examples/bad_global.pcap" contains record data that mergecap doesn't support. (pcap: major version 0 unsupported)`                        | Dies with `examples/bad_global.pcap panic: Unknown major version 0` | `examples/bad_global.pcap`                                                                      |
+| Corrupt packet header | Infinite loop?                                                                                | Dies with `mergecap: The file "examples/bad_first_header.pcap" appears to be damaged or corrupt. (pcap: File has 2368110654-byte packet, bigger than maximum of 262144)` | Skips the packet and tries to find the next header                  | `examples/bad_first_header.pcap`                                                                |
+| Unexpectd EOF         | Pads the last packet                                                                          | Pads the last packet                                                                                                                                                     | Pads the last packet                                                | `examples/unexpected_eof_on_first_packet.pcap`, `examples/unexpected_eof_on_second_packet.pcap` |
 
 `TODO: tcpslice dies when can't find the last packet?`
 
