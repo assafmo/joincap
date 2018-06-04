@@ -1,5 +1,4 @@
 .vscode
-*.gz
-*.pcap
-tmpfs
+*.pcap*
+_tmpfs
 debug
