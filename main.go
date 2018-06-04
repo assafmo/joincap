@@ -52,6 +52,9 @@ func main() {
 		fmt.Println("joincap v" + version)
 		os.Exit(0)
 	}
+	if opts.Verbose {
+		fmt.Println("joincap v" + version)
+	}
 
 	readers := make([]*pcapgo.Reader, 0)
 	h := &PacketHeap{}
