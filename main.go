@@ -43,7 +43,7 @@ func main() {
 	dieOnError(err, "")
 
 	if opts.Version {
-		fmt.Println("joincap v0.3.0")
+		fmt.Println("joincap v0.4.0")
 		os.Exit(0)
 	}
 
