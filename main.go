@@ -54,7 +54,7 @@ func main() {
 	outputFile := os.Stdout
 
 	if opts.OutputFilePath != "-" {
-		outputFile, err := os.Create(opts.OutputFilePath)
+		outputFile, err = os.Create(opts.OutputFilePath)
 		dieOnError(err, opts.OutputFilePath)
 		defer outputFile.Close()
 	}
