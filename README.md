@@ -27,7 +27,15 @@ go get -u github.com/assafmo/joincap
 ## Usage
 
 ```bash
-joincap <infile> [<infile>...] > merged.pcap
+Usage:
+  joincap [OPTIONS]
+
+Application Options:
+  -v, --version  Print the version and exit.
+  -w=            Sets the output filename. If the name is '-', stdout will be used. (default: -)
+
+Help Options:
+  -h, --help     Show this help message
 ```
 
 ## Benchmarks
