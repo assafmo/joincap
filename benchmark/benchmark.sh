@@ -16,7 +16,7 @@ fi
 
 # mount tmpfs
 mkdir -p ./_tmpfs/
-sudo mount -t tmpfs -o size=4G tmpfs ./_tmpfs/
+sudo mount -t tmpfs -o size=3200M tmpfs ./_tmpfs/
 
 # copy pcaps to tmpfs
 cp *.pcap ./_tmpfs/
