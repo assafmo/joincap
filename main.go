@@ -16,7 +16,8 @@ import (
 )
 
 var opts struct {
-	Version        bool   `short:"v" long:"version" description:"Print the version and exit."`
+	Verbose        bool   `short:"v" long:"verbose" description:"Explain when skiping packets or entire input files."`
+	Version        bool   `short:"V" long:"version" description:"Print the version and exit."`
 	OutputFilePath string `short:"w" default:"-" description:"Sets the output filename. If the name is '-', stdout will be used."`
 }
 
@@ -76,14 +77,18 @@ func main() {
 	for _, pcapPath := range restOfArgs[1:] {
 		f, err := os.Open(pcapPath)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skiping)")
+			if opts.Verbose {
+				fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skiping)")
+			}
 			continue
 		}
 		defer f.Close()
 
 		pcapReader, err := pcapgo.NewReader(f)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skiping)")
+			if opts.Verbose {
+				fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skiping)")
+			}
 			continue
 		}
 
@@ -101,7 +106,7 @@ func main() {
 			if err != nil {
 				if err == io.EOF {
 					break
-				} else {
+				} else if opts.Verbose {
 					// skip errors
 					fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skiping this packet)")
 				}
@@ -120,7 +125,7 @@ func main() {
 		// find earliest packet and write in to the output file
 		packet := h.Pop().(Packet)
 		err = pcapWriter.WritePacket(packet.CaptureInfo, packet.Data)
-		if err != nil {
+		if err != nil && opts.Verbose {
 			// skip errors
 			fmt.Fprintln(os.Stderr, err, "(skiping this packet)")
 		}
@@ -132,7 +137,7 @@ func main() {
 			if err != nil {
 				if err == io.EOF {
 					break
-				} else {
+				} else if opts.Verbose {
 					// skip errors
 					fmt.Fprintln(os.Stderr, packet.PcapPath+":", err, "(skiping this packet)")
 				}

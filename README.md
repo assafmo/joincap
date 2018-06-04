@@ -8,19 +8,19 @@ I believe skipping corrupt packets is better than failing the entire merge job.
 When using `tcpslice` or `mergecap` sometimes `pcapfix` is needed to fix bad input pcap files.
 
 1.  One option is to try and run merge (`mergecap`/`tcpslice`), if we get errors then run `pcapfix` on the bad pcaps and then run merge again.
-    * Adds complexity (run -> check errors -> fix -> rerun)
-    * (If errors) Demands more resources (`pcapfix` processes)
-    * (If errors) Extends the total run time
+    - Adds complexity (run -> check errors -> fix -> rerun)
+    - (If errors) Demands more resources (`pcapfix` processes)
+    - (If errors) Extends the total run time
 2.  Another option is to run `pcapfix` on the input pcap files and then merge.
-    * Extends the total run time by a lot (read and write each pcap twice instead of once)
-    * Demands more storage (for the fixed pcaps)
-    * Demands more resources (`pcapfix` processes)
+    - Extends the total run time by a lot (read and write each pcap twice instead of once)
+    - Demands more storage (for the fixed pcaps)
+    - Demands more resources (`pcapfix` processes)
 3.  We can use `pcapfix` "in memory" with process substitution: `mergecap -w out.pcap <(pcapfix -o /dev/stdout 1.pcap) <(pcapfix -o /dev/stdout 2.pcap)`.
-    * Adds complexity (build a complex command line)
-    * Demands more resources (`pcapfix` processes)
-    * Harder for us to use pathname expansion (e.g. `tcpslice -w out.pcap *.pcap`)
-    * We have to mind the command line character limit (in case of long pathnames)
-    * Doesn't work for `tcpslice` (seeks the last packets to calculate time ranges - cannot do this with pipes)
+    - Adds complexity (build a complex command line)
+    - Demands more resources (`pcapfix` processes)
+    - Harder for us to use pathname expansion (e.g. `tcpslice -w out.pcap *.pcap`)
+    - We have to mind the command line character limit (in case of long pathnames)
+    - Doesn't work for `tcpslice` (seeks the last packets to calculate time ranges - cannot do this with pipes)
 
 ## Error handling: `tcpslice` vs `mergecap` vs `joincap`
 
