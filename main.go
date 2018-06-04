@@ -27,9 +27,10 @@ func max(x, y uint32) uint32 {
 	return y
 }
 
-func dieOnError(err error) {
+func dieOnError(err error, path string) {
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Fprintln(os.Stderr, path)
+		panic(err)
 	}
 }
 
@@ -39,7 +40,7 @@ func main() {
 	}()
 
 	restOfArgs, err := flags.ParseArgs(&opts, os.Args)
-	dieOnError(err)
+	dieOnError(err, "")
 
 	if opts.Version {
 		fmt.Println("joincap v0.3.0")
@@ -54,7 +55,7 @@ func main() {
 
 	if opts.OutputFilePath != "-" {
 		outputFile, err := os.Create(opts.OutputFilePath)
-		dieOnError(err)
+		dieOnError(err, opts.OutputFilePath)
 		defer outputFile.Close()
 	}
 	bufferedWriter := bufio.NewWriter(outputFile)
@@ -66,11 +67,11 @@ func main() {
 	var linkType layers.LinkType
 	for _, pcapPath := range restOfArgs[1:] {
 		f, err := os.Open(pcapPath)
-		dieOnError(err)
+		dieOnError(err, pcapPath)
 		defer f.Close()
 
 		pcapReader, err := pcapgo.NewReader(f)
-		dieOnError(err)
+		dieOnError(err, pcapPath)
 
 		readers = append(readers, pcapReader)
 
