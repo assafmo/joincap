@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
-	_ "net/http/pprof"
+	// "net/http"
+	// _ "net/http/pprof"
 	"os"
 
 	"github.com/google/gopacket/layers"
@@ -35,9 +35,9 @@ func dieOnError(err error, path string) {
 }
 
 func main() {
-	go func() {
-		log.Println(http.ListenAndServe("localhost:8080", nil))
-	}()
+	// go func() {
+	// 	log.Println(http.ListenAndServe("localhost:8080", nil))
+	// }()
 
 	restOfArgs, err := flags.ParseArgs(&opts, os.Args)
 	dieOnError(err, "")
