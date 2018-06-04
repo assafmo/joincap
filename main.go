@@ -89,7 +89,7 @@ func main() {
 					break
 				} else {
 					// skip errors
-					fmt.Fprintln(os.Stderr, err)
+					fmt.Fprintln(os.Stderr, pcapPath+":", err)
 				}
 			}
 			h.Push(Packet{captureInfo, data, pcapReader, pcapPath})
@@ -103,15 +103,16 @@ func main() {
 			break
 		}
 
-		// find earliest packet to write
+		// find earliest packet and write in to the output file
 		packet := h.Pop().(Packet)
 		err = pcapWriter.WritePacket(packet.CaptureInfo, packet.Data)
 		if err != nil {
 			// skip errors
-			fmt.Fprintln(os.Stderr, packet.PcapPath, err)
+			fmt.Fprintln(os.Stderr, err)
 		}
 
-		// read the next packet from the written packet source
+		// read the next packet from the source of the written packet
+		// and push it to the heap
 		for {
 			data, captureInfo, err := packet.Reader.ReadPacketData()
 			if err != nil {
@@ -119,7 +120,7 @@ func main() {
 					break
 				} else {
 					// skip errors
-					fmt.Fprintln(os.Stderr, packet.PcapPath, err)
+					fmt.Fprintln(os.Stderr, packet.PcapPath+":", err)
 				}
 			}
 			h.Push(Packet{captureInfo, data, packet.Reader, packet.PcapPath})
