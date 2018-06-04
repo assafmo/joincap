@@ -57,8 +57,8 @@ func main() {
 	}
 
 	readers := make([]*pcapgo.Reader, 0)
-	h := &PacketHeap{}
-	heap.Init(h)
+	minimumHeap := &PacketHeap{}
+	heap.Init(minimumHeap)
 
 	outputFile := os.Stdout
 
@@ -114,19 +114,19 @@ func main() {
 					fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skiping this packet)")
 				}
 			}
-			h.Push(Packet{&captureInfo, &data, pcapReader, pcapPath})
+			minimumHeap.Push(Packet{&captureInfo, &data, pcapReader, pcapPath})
 			break
 		}
 	}
 
 	pcapWriter.WriteFileHeader(snaplen, linkType)
 	for {
-		if h.Len() == 0 {
+		if minimumHeap.Len() == 0 {
 			break
 		}
 
 		// find earliest packet and write in to the output file
-		packet := h.Pop().(Packet)
+		packet := minimumHeap.Pop().(Packet)
 		err = pcapWriter.WritePacket(*packet.CaptureInfo, *packet.Data)
 		if err != nil && opts.Verbose {
 			// skip errors
@@ -145,7 +145,7 @@ func main() {
 					fmt.Fprintln(os.Stderr, packet.PcapPath+":", err, "(skiping this packet)")
 				}
 			}
-			h.Push(Packet{&captureInfo, &data, packet.Reader, packet.PcapPath})
+			minimumHeap.Push(Packet{&captureInfo, &data, packet.Reader, packet.PcapPath})
 			break
 		}
 	}
