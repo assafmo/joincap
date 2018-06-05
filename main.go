@@ -119,11 +119,7 @@ func main() {
 	}
 
 	pcapWriter.WriteFileHeader(snaplen, linkType)
-	for {
-		if minimumHeap.Len() == 0 {
-			break
-		}
-
+	for minimumHeap.Len() > 0 {
 		// find earliest packet and write in to the output file
 		packet := heap.Pop(minimumHeap).(Packet)
 		err = pcapWriter.WritePacket(*packet.CaptureInfo, *packet.Data)

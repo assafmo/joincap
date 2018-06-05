@@ -39,5 +39,5 @@ joincap --version
 time joincap "$BENCHMARK_DIR"/_tmpfs/*pcap | pv > /dev/null
 
 sleep 3
-sudo umount -f "$BENCHMARK_DIR"/_tmpfs/
+sudo umount "$BENCHMARK_DIR"/_tmpfs/
 rm -rf "$BENCHMARK_DIR"/_tmpfs/
