@@ -55,7 +55,6 @@ func main() {
 		fmt.Println("joincap v" + version)
 	}
 
-	readers := make([]*pcapgo.Reader, 0)
 	minimumHeap := &PacketHeap{}
 	heap.Init(minimumHeap)
 
@@ -93,8 +92,6 @@ func main() {
 			}
 			continue
 		}
-
-		readers = append(readers, pcapReader)
 
 		snaplen = max(snaplen, pcapReader.Snaplen())
 		if linkType == layers.LinkTypeNull {
