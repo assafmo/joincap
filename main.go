@@ -80,7 +80,7 @@ func main() {
 		f, err := os.Open(pcapPath)
 		if err != nil {
 			if opts.Verbose {
-				fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skipping)")
+				fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skipping this file)")
 			}
 			continue
 		}
@@ -89,7 +89,7 @@ func main() {
 		pcapReader, err := pcapgo.NewReader(f)
 		if err != nil {
 			if opts.Verbose {
-				fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skipping)")
+				fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skipping this file)")
 			}
 			continue
 		}
