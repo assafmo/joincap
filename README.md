@@ -59,7 +59,7 @@ Help Options:
 
 ## Benchmarks
 
-**_TL;DR: `tcpslice` > `mergecap` > `joincap`._**
+**_TL;DR: `tcpslice` is the fastest, `joincap` is the slowest._**
 
 ```
 mergecap:
