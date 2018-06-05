@@ -49,7 +49,7 @@ Usage:
   main [OPTIONS]
 
 Application Options:
-  -v, --verbose  Explain when skiping packets or entire input files.
+  -v, --verbose  Explain when skipping packets or entire input files.
   -V, --version  Print the version and exit.
   -w=            Sets the output filename. If the name is '-', stdout will be used. (default: -)
 

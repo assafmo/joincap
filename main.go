@@ -15,7 +15,7 @@ import (
 )
 
 var opts struct {
-	Verbose        bool   `short:"v" long:"verbose" description:"Explain when skiping packets or entire input files."`
+	Verbose        bool   `short:"v" long:"verbose" description:"Explain when skipping packets or entire input files."`
 	Version        bool   `short:"V" long:"version" description:"Print the version and exit."`
 	OutputFilePath string `short:"w" default:"-" description:"Sets the output filename. If the name is '-', stdout will be used."`
 }
@@ -80,7 +80,7 @@ func main() {
 		f, err := os.Open(pcapPath)
 		if err != nil {
 			if opts.Verbose {
-				fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skiping)")
+				fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skipping)")
 			}
 			continue
 		}
@@ -89,7 +89,7 @@ func main() {
 		pcapReader, err := pcapgo.NewReader(f)
 		if err != nil {
 			if opts.Verbose {
-				fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skiping)")
+				fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skipping)")
 			}
 			continue
 		}
@@ -110,7 +110,7 @@ func main() {
 					break
 				} else if opts.Verbose {
 					// skip errors
-					fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skiping this packet)")
+					fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skipping this packet)")
 				}
 			}
 			minimumHeap.Push(Packet{&captureInfo, &data, pcapReader, pcapPath})
@@ -129,7 +129,7 @@ func main() {
 		err = pcapWriter.WritePacket(*packet.CaptureInfo, *packet.Data)
 		if err != nil && opts.Verbose {
 			// skip errors
-			fmt.Fprintln(os.Stderr, err, "(skiping this packet)")
+			fmt.Fprintln(os.Stderr, err, "(skipping this packet)")
 		}
 
 		// read the next packet from the source of the written packet
