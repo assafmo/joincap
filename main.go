@@ -9,6 +9,7 @@ import (
 	// _ "net/http/pprof"
 	"os"
 
+	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcapgo"
 	"github.com/jessevdk/go-flags"
@@ -27,7 +28,7 @@ func max(x, y uint32) uint32 {
 	return y
 }
 
-const version = "0.7.2"
+const version = "0.7.3"
 
 func main() {
 	// go func() {
@@ -120,14 +121,14 @@ func main() {
 	for minimumHeap.Len() > 0 {
 		// find earliest packet and write in to the output file
 		packet := heap.Pop(minimumHeap).(Packet)
-		err = pcapWriter.WritePacket(*packet.CaptureInfo, *packet.Data)
-		if err != nil && opts.Verbose {
-			// skip errors
-			fmt.Fprintln(os.Stderr, err, "(skipping this packet)")
-		}
+		write(pcapWriter, packet.CaptureInfo, packet.Data)
 
 		// read the next packet from the source of the written packet
 		// and push it to the heap
+		var nextPacketTime int64
+		if minimumHeap.Len() > 0 {
+			nextPacketTime = (*minimumHeap)[0].CaptureInfo.Timestamp.UnixNano()
+		}
 		for {
 			data, captureInfo, err := packet.Reader.ReadPacketData()
 			if err != nil {
@@ -139,8 +140,22 @@ func main() {
 				}
 				continue
 			}
+
+			if captureInfo.Timestamp.UnixNano() <= nextPacketTime {
+				write(pcapWriter, &captureInfo, &data)
+				continue
+			}
+
 			heap.Push(minimumHeap, Packet{&captureInfo, &data, packet.Reader, packet.PcapPath})
 			break
 		}
+	}
+}
+
+func write(pcapWriter *pcapgo.Writer, capInfo *gopacket.CaptureInfo, data *[]byte) {
+	err := pcapWriter.WritePacket(*capInfo, *data)
+	if err != nil && opts.Verbose {
+		// skip errors
+		fmt.Fprintln(os.Stderr, err, "(skipping this packet)")
 	}
 }
