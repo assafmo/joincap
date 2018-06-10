@@ -5,8 +5,9 @@ import (
 	"container/heap"
 	"fmt"
 	"io"
-	// "net/http"
-	// _ "net/http/pprof"
+	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 
 	"github.com/google/gopacket"
@@ -31,9 +32,9 @@ func max(x, y uint32) uint32 {
 const version = "0.7.3"
 
 func main() {
-	// go func() {
-	// 	log.Println(http.ListenAndServe("localhost:8080", nil))
-	// }()
+	go func() {
+		log.Println(http.ListenAndServe("localhost:8080", nil))
+	}()
 
 	restOfArgs, err := flags.ParseArgs(&opts, os.Args)
 
@@ -123,8 +124,9 @@ func main() {
 		packet := heap.Pop(minimumHeap).(Packet)
 		write(pcapWriter, packet.CaptureInfo, packet.Data)
 
-		// read the next packet from the source of the written packet
-		// and push it to the heap
+		// read the next packet from the source of the last written packet.
+		// if this is the next packet, write it
+		// else push it to the heap
 		var nextPacketTime int64
 		if minimumHeap.Len() > 0 {
 			nextPacketTime = (*minimumHeap)[0].CaptureInfo.Timestamp.UnixNano()
