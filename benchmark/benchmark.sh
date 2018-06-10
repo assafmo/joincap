@@ -35,17 +35,17 @@ fi
 # print versions for joincap, mergecap, tcpslice
 echo mergecap:
 mergecap --version
-time mergecap -w - "$PCAPS_DIR"/*pcap | pv > /dev/null
+time mergecap -w - "$PCAPS_DIR"/*pcap | pv -f > /dev/null
 
 echo
 echo tcpslice:
 tcpslice --version
-time tcpslice -w /dev/stdout "$PCAPS_DIR"/*pcap | pv > /dev/null
+time tcpslice -w /dev/stdout "$PCAPS_DIR"/*pcap | pv -f > /dev/null
 
 echo
 echo joincap:
 joincap --version
-time joincap "$PCAPS_DIR"/*pcap | pv > /dev/null
+time joincap "$PCAPS_DIR"/*pcap | pv -f > /dev/null
 
 if [[ $(free -m | awk '/Mem/{print $2}') -gt 6000 ]]; then
     sleep 3
