@@ -27,7 +27,7 @@ func max(x, y uint32) uint32 {
 	return y
 }
 
-const version = "0.7.0"
+const version = "0.7.1"
 
 func main() {
 	// go func() {
@@ -137,7 +137,7 @@ func main() {
 					fmt.Fprintln(os.Stderr, *packet.PcapPath+":", err, "(skiping this packet)")
 				}
 			}
-			minimumHeap.Push(Packet{&captureInfo, &data, packet.Reader, packet.PcapPath})
+			heap.Push(minimumHeap, Packet{&captureInfo, &data, packet.Reader, packet.PcapPath})
 			break
 		}
 	}
