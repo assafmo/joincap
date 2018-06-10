@@ -23,7 +23,7 @@ PCAPS_DIR="$BENCHMARK_DIR"
 if [[ $(free -m | awk '/Mem/{print $2}') -gt 6000 ]]; then
     echo Mount tmpfs and copy pcaps inside
     # mount tmpfs
-    mkdir "$BENCHMARK_DIR"/_tmpfs/
+    mkdir -p "$BENCHMARK_DIR"/_tmpfs/
     sudo mount -t tmpfs -o size=3G tmpfs "$BENCHMARK_DIR"/_tmpfs/
 
     # copy pcaps to tmpfs
