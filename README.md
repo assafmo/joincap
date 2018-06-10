@@ -59,11 +59,11 @@ Help Options:
 
 ## Benchmarks
 
-|          | Version | Speed    | Time      |
-| -------- | ------- | -------- | --------- |
-| mergecap | 2.4.5   | 360MiB/s | 0m5.323s  |
-| tcpslice | 1.2a3   | 641MiB/s | 0m3.565s  |
-| joincap  | 0.7.2   | 187MiB/s | 0m11.206s |
+|              | Version | Speed    | Time      |
+| ------------ | ------- | -------- | --------- |
+| **mergecap** | 2.4.5   | 363MiB/s | 0m5.288s  |
+| **tcpslice** | 1.2a3   | 648MiB/s | 0m3.486s  |
+| **joincap**  | 0.7.2   | 190MiB/s | 0m10.054s |
 
 - Merging 3 files with total size of 2.99994GiB.
 - Running on Linux 4.15.0-22-generic, with Intel(R) Core(TM) i5-8250U CPU @1.60GHz (with SSE4.2), with 7873 MB of physical memory, with locale C, with zlib1.2.11.

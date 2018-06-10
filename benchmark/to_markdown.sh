@@ -6,11 +6,11 @@ BENCHMARK_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 echo '| | Version | Speed | Time |'
 echo '| --- | --- | --- | --- |'
-cat /tmp/benchmark | grep -A 17 'mergecap:' | awk '/Mergecap \(Wireshark\)/{version=$3} /<=>/{speed=$4} /real/{time=$2} END{print "| mergecap | "version" | "speed" | "time" |" }' | tr -d ]
+cat /tmp/benchmark | grep -A 17 'mergecap:' | awk '/Mergecap \(Wireshark\)/{version=$3} /<=>/{speed=$4} /real/{time=$2} END{print "| **mergecap** | "version" | "speed" | "time" |" }' | tr -d ]
 
-cat /tmp/benchmark | grep -A 10 'tcpslice:' | awk '/Version/{version=$2} /<=>/{speed=$4} /real/{time=$2} END{print "| tcpslice | "version" | "speed" | "time" |" }' | tr -d ]
+cat /tmp/benchmark | grep -A 10 'tcpslice:' | awk '/Version/{version=$2} /<=>/{speed=$4} /real/{time=$2} END{print "| **tcpslice** | "version" | "speed" | "time" |" }' | tr -d ]
 
-cat /tmp/benchmark | grep -A 4 'joincap:' | awk '/joincap v/{version=$2} /<=>/{speed=$4} /real/{time=$2} END{print "| joincap | "version" | "speed" | "time" |" }' | tr -d ']' | sed -r 's/v([0-9])/\1/'
+cat /tmp/benchmark | grep -A 4 'joincap:' | awk '/joincap v/{version=$2} /<=>/{speed=$4} /real/{time=$2} END{print "| **joincap** | "version" | "speed" | "time" |" }' | tr -d ']' | sed -r 's/v([0-9])/\1/'
 
 echo
 
