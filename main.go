@@ -134,16 +134,16 @@ func main() {
 
 	pcapWriter.WriteFileHeader(snaplen, linkType)
 	for minimumHeap.Len() > 0 {
-		// find earliest packet and write it to the output file
+		// find the earliest packet and write it to the output file
 		packet := heap.Pop(minimumHeap).(Packet)
 		write(pcapWriter, packet.CaptureInfo, packet.Data)
 
 		// read the next packet from the source of the last written packet.
-		// if this is the next packet, write it
+		// if this is the earliest packet, write it to the output file
 		// else push it to the heap
-		var nextPacketTime int64
+		var earliestHeapTime int64
 		if minimumHeap.Len() > 0 {
-			nextPacketTime = (*minimumHeap)[0].CaptureInfo.Timestamp.UnixNano()
+			earliestHeapTime = (*minimumHeap)[0].CaptureInfo.Timestamp.UnixNano()
 		}
 		for {
 			data, captureInfo, err := packet.Reader.ReadPacketData()
@@ -158,7 +158,7 @@ func main() {
 				continue
 			}
 
-			if captureInfo.Timestamp.UnixNano() <= nextPacketTime {
+			if captureInfo.Timestamp.UnixNano() <= earliestHeapTime {
 				write(pcapWriter, &captureInfo, &data)
 				continue
 			}
