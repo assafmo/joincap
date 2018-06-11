@@ -5,9 +5,9 @@ import (
 	"container/heap"
 	"fmt"
 	"io"
-	"log"
-	"net/http"
-	_ "net/http/pprof"
+	// "log"
+	// "net/http"
+	// _ "net/http/pprof"
 	"os"
 
 	"github.com/google/gopacket"
@@ -32,12 +32,12 @@ func max(x, y uint32) uint32 {
 	return y
 }
 
-const version = "0.7.3"
+const version = "0.7.4"
 
 func main() {
-	go func() {
-		log.Println(http.ListenAndServe("localhost:8080", nil))
-	}()
+	// go func() {
+	// 	log.Println(http.ListenAndServe("localhost:8080", nil))
+	// }()
 
 	_, err := flags.ParseArgs(&opts, os.Args)
 
@@ -57,14 +57,13 @@ func main() {
 		os.Exit(0)
 	}
 	if opts.Verbose {
-		fmt.Println("joincap v" + version)
+		fmt.Fprintln(os.Stderr, "joincap v"+version)
 	}
 
 	minimumHeap := &PacketHeap{}
 	heap.Init(minimumHeap)
 
 	outputFile := os.Stdout
-
 	if opts.OutputFilePath != "-" {
 		outputFile, err = os.Create(opts.OutputFilePath)
 		if err != nil {
@@ -78,6 +77,7 @@ func main() {
 
 	pcapWriter := pcapgo.NewWriter(bufferedWriter)
 
+	var totalInputSizeBytes int64
 	var snaplen uint32
 	var linkType layers.LinkType
 	for _, pcapPath := range opts.Rest.InFiles[1:] {
@@ -89,6 +89,9 @@ func main() {
 			continue
 		}
 		defer f.Close()
+
+		fStat, _ := f.Stat()
+		totalInputSizeBytes += fStat.Size()
 
 		pcapReader, err := pcapgo.NewReader(f)
 		if err != nil {
@@ -120,6 +123,11 @@ func main() {
 			heap.Push(minimumHeap, Packet{&captureInfo, &data, pcapReader, &pcapPath})
 			break
 		}
+	}
+
+	if opts.Verbose {
+		fmt.Fprintf(os.Stderr, "merging %d input files of size %f GiB\n", minimumHeap.Len(), float64(totalInputSizeBytes)/1024/1024/1024)
+		fmt.Fprintf(os.Stderr, "writing to %s\n", outputFile.Name())
 	}
 
 	pcapWriter.WriteFileHeader(snaplen, linkType)
