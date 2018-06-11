@@ -46,7 +46,7 @@ go get -u github.com/assafmo/joincap
 
 ```bash
 Usage:
-  joincap [OPTIONS] <infile> [<infile> ...]
+  joincap [OPTIONS] InFiles...
 
 Application Options:
   -v, --verbose  Explain when skipping packets or entire input files.
@@ -55,6 +55,8 @@ Application Options:
 
 Help Options:
   -h, --help     Show this help message
+
+joincap v0.7.3
 ```
 
 ## Benchmarks
