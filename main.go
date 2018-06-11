@@ -42,7 +42,7 @@ func main() {
 	_, err := flags.ParseArgs(&opts, os.Args)
 
 	// if -h or -V then print to stdout and exit
-	// else print messages to stderr (to avoid conflicts with outputFile)
+	// else print messages to stderr (avoids conflicts with outputFile)
 	if err != nil {
 		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
 			// print version and help and exit
@@ -107,7 +107,7 @@ func main() {
 		if linkType == layers.LinkTypeNull {
 			linkType = pcapReader.LinkType()
 		} else if linkType != pcapReader.LinkType() {
-			panic(fmt.Sprintln("Different LinkTypes:", linkType, pcapReader.LinkType()))
+			panic(fmt.Sprintln(pcapPath+":", "Different LinkTypes:", linkType, pcapReader.LinkType()))
 		}
 
 		for {
