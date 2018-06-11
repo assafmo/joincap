@@ -107,7 +107,8 @@ func main() {
 			if err != nil {
 				if err == io.EOF {
 					break
-				} else if opts.Verbose {
+				}
+				if opts.Verbose {
 					// skip errors
 					fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skipping this packet)")
 				}
@@ -120,7 +121,7 @@ func main() {
 
 	pcapWriter.WriteFileHeader(snaplen, linkType)
 	for minimumHeap.Len() > 0 {
-		// find earliest packet and write in to the output file
+		// find earliest packet and write it to the output file
 		packet := heap.Pop(minimumHeap).(Packet)
 		write(pcapWriter, packet.CaptureInfo, packet.Data)
 
@@ -136,7 +137,8 @@ func main() {
 			if err != nil {
 				if err == io.EOF {
 					break
-				} else if opts.Verbose {
+				}
+				if opts.Verbose {
 					// skip errors
 					fmt.Fprintln(os.Stderr, *packet.PcapPath+":", err, "(skipping this packet)")
 				}
@@ -154,8 +156,8 @@ func main() {
 	}
 }
 
-func write(pcapWriter *pcapgo.Writer, capInfo *gopacket.CaptureInfo, data *[]byte) {
-	err := pcapWriter.WritePacket(*capInfo, *data)
+func write(pcapWriter *pcapgo.Writer, captureInfo *gopacket.CaptureInfo, data *[]byte) {
+	err := pcapWriter.WritePacket(*captureInfo, *data)
 	if err != nil && opts.Verbose {
 		// skip errors
 		fmt.Fprintln(os.Stderr, err, "(skipping this packet)")
