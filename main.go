@@ -20,6 +20,9 @@ var opts struct {
 	Verbose        bool   `short:"v" long:"verbose" description:"Explain when skipping packets or entire input files."`
 	Version        bool   `short:"V" long:"version" description:"Print the version and exit."`
 	OutputFilePath string `short:"w" default:"-" description:"Sets the output filename. If the name is '-', stdout will be used."`
+	Rest           struct {
+		InFiles []string
+	} `positional-args:"yes" required:"yes"`
 }
 
 func max(x, y uint32) uint32 {
@@ -36,7 +39,7 @@ func main() {
 		log.Println(http.ListenAndServe("localhost:8080", nil))
 	}()
 
-	restOfArgs, err := flags.ParseArgs(&opts, os.Args)
+	_, err := flags.ParseArgs(&opts, os.Args)
 
 	if err != nil {
 		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
@@ -77,7 +80,7 @@ func main() {
 
 	var snaplen uint32
 	var linkType layers.LinkType
-	for _, pcapPath := range restOfArgs[1:] {
+	for _, pcapPath := range opts.Rest.InFiles[1:] {
 		f, err := os.Open(pcapPath)
 		if err != nil {
 			if opts.Verbose {
