@@ -117,9 +117,9 @@ func main() {
 					break
 				}
 				if opts.Verbose {
-					// skip errors
 					fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skipping this packet)")
 				}
+				// skip errors
 				continue
 			}
 			heap.Push(minimumHeap, Packet{&captureInfo, &data, pcapReader, &pcapPath})
@@ -152,9 +152,9 @@ func main() {
 					break
 				}
 				if opts.Verbose {
-					// skip errors
 					fmt.Fprintln(os.Stderr, *packet.PcapPath+":", err, "(skipping this packet)")
 				}
+				// skip errors
 				continue
 			}
 
@@ -172,7 +172,7 @@ func main() {
 func write(pcapWriter *pcapgo.Writer, captureInfo *gopacket.CaptureInfo, data *[]byte) {
 	err := pcapWriter.WritePacket(*captureInfo, *data)
 	if err != nil && opts.Verbose {
-		// skip errors
 		fmt.Fprintln(os.Stderr, err, "(skipping this packet)")
+		// skip errors
 	}
 }
