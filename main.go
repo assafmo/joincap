@@ -122,7 +122,7 @@ func main() {
 				// skip errors
 				continue
 			}
-			heap.Push(minTimeHeap, Packet{&captureInfo, &data, pcapReader, &pcapPath})
+			heap.Push(minTimeHeap, &Packet{&captureInfo, &data, pcapReader, &pcapPath})
 			break
 		}
 	}
@@ -135,7 +135,7 @@ func main() {
 	pcapWriter.WriteFileHeader(snaplen, linkType)
 	for minTimeHeap.Len() > 0 {
 		// find the earliest packet and write it to the output file
-		packet := heap.Pop(minTimeHeap).(Packet)
+		packet := heap.Pop(minTimeHeap).(*Packet)
 		write(pcapWriter, packet.CaptureInfo, packet.Data)
 
 		// read the next packet from the source of the last written packet.
@@ -163,7 +163,7 @@ func main() {
 				continue
 			}
 
-			heap.Push(minTimeHeap, Packet{&captureInfo, &data, packet.Reader, packet.PcapPath})
+			heap.Push(minTimeHeap, &Packet{&captureInfo, &data, packet.Reader, packet.PcapPath})
 			break
 		}
 	}

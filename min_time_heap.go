@@ -13,8 +13,8 @@ type Packet struct {
 	PcapPath    *string
 }
 
-// PacketHeap is a minimum heap of packets by timestamp
-type PacketHeap []Packet
+// PacketHeap is a minimum heap of packets ordered by timestamp
+type PacketHeap []*Packet
 
 func (h PacketHeap) Len() int { return len(h) }
 func (h PacketHeap) Less(i, j int) bool {
@@ -25,7 +25,7 @@ func (h PacketHeap) Swap(i, j int) { h[i], h[j] = h[j], h[i] }
 // Push use pointer receivers because they modify the slice's length,
 // not just its contents.
 func (h *PacketHeap) Push(x interface{}) {
-	*h = append(*h, x.(Packet))
+	*h = append(*h, x.(*Packet))
 }
 
 // Pop use pointer receivers because they modify the slice's length,
