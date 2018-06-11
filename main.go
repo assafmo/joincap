@@ -41,6 +41,8 @@ func main() {
 
 	_, err := flags.ParseArgs(&opts, os.Args)
 
+	// if -h or -V then print to stdout and exit
+	// else print messages to stderr (to avoid conflicts with outputFile)
 	if err != nil {
 		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
 			// print version and help and exit
