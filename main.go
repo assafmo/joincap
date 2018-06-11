@@ -10,9 +10,9 @@ import (
 	// _ "net/http/pprof"
 	"os"
 
+	"github.com/assafmo/gopacket/pcapgo"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
-	"github.com/google/gopacket/pcapgo"
 	"github.com/jessevdk/go-flags"
 )
 
@@ -32,7 +32,7 @@ func max(x, y uint32) uint32 {
 	return y
 }
 
-const version = "0.7.5"
+const version = "0.7.6"
 
 func main() {
 	// go func() {
@@ -111,7 +111,7 @@ func main() {
 		}
 
 		for {
-			data, captureInfo, err := pcapReader.ReadPacketData()
+			data, captureInfo, err := pcapReader.ReadPacketDataNoCopy()
 			if err != nil {
 				if err == io.EOF {
 					break
@@ -122,7 +122,7 @@ func main() {
 				// skip errors
 				continue
 			}
-			heap.Push(minTimeHeap, &Packet{&captureInfo, &data, pcapReader, &pcapPath})
+			heap.Push(minTimeHeap, &Packet{captureInfo, data, pcapReader, &pcapPath})
 			break
 		}
 	}
@@ -146,7 +146,7 @@ func main() {
 			earliestHeapTime = (*minTimeHeap)[0].CaptureInfo.Timestamp.UnixNano()
 		}
 		for {
-			data, captureInfo, err := packet.Reader.ReadPacketData()
+			data, captureInfo, err := packet.Reader.ReadPacketDataNoCopy()
 			if err != nil {
 				if err == io.EOF {
 					break
@@ -159,11 +159,11 @@ func main() {
 			}
 
 			if captureInfo.Timestamp.UnixNano() <= earliestHeapTime {
-				write(pcapWriter, &captureInfo, &data)
+				write(pcapWriter, captureInfo, data)
 				continue
 			}
 
-			heap.Push(minTimeHeap, &Packet{&captureInfo, &data, packet.Reader, packet.PcapPath})
+			heap.Push(minTimeHeap, &Packet{captureInfo, data, packet.Reader, packet.PcapPath})
 			break
 		}
 	}

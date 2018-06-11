@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/assafmo/gopacket/pcapgo"
 	"github.com/google/gopacket"
-	"github.com/google/gopacket/pcapgo"
 )
 
 // Packet to be merged
