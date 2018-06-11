@@ -62,8 +62,8 @@ func main() {
 		fmt.Fprintln(os.Stderr, "joincap v"+version)
 	}
 
-	minimumHeap := &PacketHeap{}
-	heap.Init(minimumHeap)
+	minTimeHeap := &PacketHeap{}
+	heap.Init(minTimeHeap)
 
 	outputFile := os.Stdout
 	if opts.OutputFilePath != "-" {
@@ -122,28 +122,28 @@ func main() {
 				// skip errors
 				continue
 			}
-			heap.Push(minimumHeap, Packet{&captureInfo, &data, pcapReader, &pcapPath})
+			heap.Push(minTimeHeap, Packet{&captureInfo, &data, pcapReader, &pcapPath})
 			break
 		}
 	}
 
 	if opts.Verbose {
-		fmt.Fprintf(os.Stderr, "merging %d input files of size %f GiB\n", minimumHeap.Len(), float64(totalInputSizeBytes)/1024/1024/1024)
+		fmt.Fprintf(os.Stderr, "merging %d input files of size %f GiB\n", minTimeHeap.Len(), float64(totalInputSizeBytes)/1024/1024/1024)
 		fmt.Fprintf(os.Stderr, "writing to %s\n", outputFile.Name())
 	}
 
 	pcapWriter.WriteFileHeader(snaplen, linkType)
-	for minimumHeap.Len() > 0 {
+	for minTimeHeap.Len() > 0 {
 		// find the earliest packet and write it to the output file
-		packet := heap.Pop(minimumHeap).(Packet)
+		packet := heap.Pop(minTimeHeap).(Packet)
 		write(pcapWriter, packet.CaptureInfo, packet.Data)
 
 		// read the next packet from the source of the last written packet.
 		// if this is the earliest packet, write it to the output file
 		// else push it to the heap
 		var earliestHeapTime int64
-		if minimumHeap.Len() > 0 {
-			earliestHeapTime = (*minimumHeap)[0].CaptureInfo.Timestamp.UnixNano()
+		if minTimeHeap.Len() > 0 {
+			earliestHeapTime = (*minTimeHeap)[0].CaptureInfo.Timestamp.UnixNano()
 		}
 		for {
 			data, captureInfo, err := packet.Reader.ReadPacketData()
@@ -163,7 +163,7 @@ func main() {
 				continue
 			}
 
-			heap.Push(minimumHeap, Packet{&captureInfo, &data, packet.Reader, packet.PcapPath})
+			heap.Push(minTimeHeap, Packet{&captureInfo, &data, packet.Reader, packet.PcapPath})
 			break
 		}
 	}
