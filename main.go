@@ -32,7 +32,7 @@ func max(x, y uint32) uint32 {
 	return y
 }
 
-const version = "0.7.4"
+const version = "0.7.5"
 
 func main() {
 	// go func() {
