@@ -3,7 +3,7 @@
 ## v0.8.0 (Jun 12, 2018)
 
 - make as little as possible heap memory allocations
-- close input files as soon as we are done with it
+- close each input file as soon as we are done with it
 
 ## v0.7.6 (Jun 11, 2018)
 
