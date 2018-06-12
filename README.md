@@ -46,22 +46,22 @@ Help Options:
   -h, --help     Show this help message
 ```
 
-## Error handling: `tcpslice` vs `mergecap` vs `joincap`
+## Error handling: `joincap` vs `mergecap` vs `tcpslice`
 
 ### Results
 
-| Use case                                                                                              | joincap            | tcpslice v1.2a3    | mergecap v2.4.5    |
+| Use case                                                                                              | joincap            | mergecap v2.4.5    | tcpslice v1.2a3    |
 | ----------------------------------------------------------------------------------------------------- | ------------------ | ------------------ | ------------------ |
 | Corrupt input global header                                                                           | :heavy_check_mark: | :x:                | :x:                |
 | Corrupt input packet header                                                                           | :heavy_check_mark: | :x:                | :x:                |
 | Unexpectd EOF<br>(last packet data is truncated)                                                      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| Input pcap has no packets<br>(global header is ok, no first packet header)                            | :heavy_check_mark: | :x:                | :heavy_check_mark: |
-| Input file size is smaller than 24 bytes<br>(global header is truncated)                              | :heavy_check_mark: | :x:                | :heavy_check_mark: |
+| Input pcap has no packets<br>(global header is ok, no first packet header)                            | :heavy_check_mark: | :heavy_check_mark: | :x:                |
+| Input file size is smaller than 24 bytes<br>(global header is truncated)                              | :heavy_check_mark: | :heavy_check_mark: | :x:                |
 | Input file size is between 24 and 40 bytes<br>(global header is ok, first packet header is truncated) | :heavy_check_mark: | :x:                | :x:                |
 | Input file doesn't exists                                                                             | :heavy_check_mark: | :x:                | :x:                |
 | Input file is a directory                                                                             | :heavy_check_mark: | :x:                | :x:                |
-| Input file end is garbage                                                                             | :heavy_check_mark: | :x:                | :heavy_check_mark: |
-| Input file is gzipped (.pcap.gz)                                                                      | :heavy_check_mark: | :x:                | :heavy_check_mark: |
+| Input file end is garbage                                                                             | :heavy_check_mark: | :heavy_check_mark: | :x:                |
+| Input file is gzipped (.pcap.gz)                                                                      | :heavy_check_mark: | :heavy_check_mark: | :x:                |
 
 ### Error outputs
 
