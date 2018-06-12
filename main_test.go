@@ -243,3 +243,25 @@ func TestIgnoreInputFileTruncatedFirstPacketHeader(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+// TestIgnoreInputFileDoesntExists non existing input files should be ignored
+func TestIgnoreInputFileDoesNotExists(t *testing.T) {
+	outputFile, err := ioutil.TempFile("", "joincap_output_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFile.Close()
+	defer os.Remove(outputFile.Name())
+
+	inputFilePath := "pcap_examples/ok.pcap"
+
+	joincap([]string{"joincap",
+		"-w", outputFile.Name(),
+		"/nothing/here", inputFilePath, "or_here"})
+
+	testIsOrdered(t, outputFile.Name())
+
+	if packetCount(t, inputFilePath) != packetCount(t, outputFile.Name()) {
+		t.FailNow()
+	}
+}
