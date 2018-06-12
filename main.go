@@ -15,22 +15,6 @@ import (
 	flags "github.com/jessevdk/go-flags"
 )
 
-var opts struct {
-	Verbose        bool   `short:"v" long:"verbose" description:"Explain when skipping packets or entire input files."`
-	Version        bool   `short:"V" long:"version" description:"Print the version and exit."`
-	OutputFilePath string `short:"w" default:"-" description:"Sets the output filename. If the name is '-', stdout will be used."`
-	Rest           struct {
-		InFiles []string
-	} `positional-args:"yes" required:"yes"`
-}
-
-func max(x, y uint32) uint32 {
-	if x > y {
-		return x
-	}
-	return y
-}
-
 const version = "0.8.2"
 
 func main() {
@@ -42,7 +26,16 @@ func main() {
 }
 
 func joincap(args []string) {
-	_, err := flags.ParseArgs(&opts, args)
+	var cmdFlags struct {
+		Verbose        bool   `short:"v" long:"verbose" description:"Explain when skipping packets or entire input files."`
+		Version        bool   `short:"V" long:"version" description:"Print the version and exit."`
+		OutputFilePath string `short:"w" default:"-" description:"Sets the output filename. If the name is '-', stdout will be used."`
+		Rest           struct {
+			InFiles []string
+		} `positional-args:"yes" required:"yes"`
+	}
+
+	_, err := flags.ParseArgs(&cmdFlags, args)
 
 	if err != nil {
 		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
@@ -54,12 +47,12 @@ func joincap(args []string) {
 		}
 	}
 
-	if opts.Version {
+	if cmdFlags.Version {
 		// -v flag, print version and exit
 		fmt.Printf("joincap v%s\n", version)
 		os.Exit(0)
 	}
-	if opts.Verbose {
+	if cmdFlags.Verbose {
 		fmt.Fprintf(os.Stderr, "joincap v%s\n", version)
 	}
 
@@ -67,10 +60,10 @@ func joincap(args []string) {
 	heap.Init(&minTimeHeap)
 
 	outputFile := os.Stdout
-	if opts.OutputFilePath != "-" {
-		outputFile, err = os.Create(opts.OutputFilePath)
+	if cmdFlags.OutputFilePath != "-" {
+		outputFile, err = os.Create(cmdFlags.OutputFilePath)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s: %v\n", opts.OutputFilePath, err)
+			fmt.Fprintf(os.Stderr, "%s: %v\n", cmdFlags.OutputFilePath, err)
 			panic(err)
 		}
 		defer outputFile.Close()
@@ -83,10 +76,10 @@ func joincap(args []string) {
 	var totalInputSizeBytes int64
 	var snaplen uint32 = 65536
 	var linkType layers.LinkType
-	for _, inputPcapPath := range opts.Rest.InFiles[1:] {
+	for _, inputPcapPath := range cmdFlags.Rest.InFiles[1:] {
 		inputFile, err := os.Open(inputPcapPath)
 		if err != nil {
-			if opts.Verbose {
+			if cmdFlags.Verbose {
 				fmt.Fprintf(os.Stderr, "%s: %v (skipping this file)\n", inputPcapPath, err)
 			}
 			continue
@@ -94,7 +87,7 @@ func joincap(args []string) {
 
 		reader, err := pcapgo.NewReader(inputFile)
 		if err != nil {
-			if opts.Verbose {
+			if cmdFlags.Verbose {
 				fmt.Fprintf(os.Stderr, "%s: %v (skipping this file)\n", inputFile.Name(), err)
 			}
 			continue
@@ -110,13 +103,13 @@ func joincap(args []string) {
 			panic(fmt.Sprintln(inputFile.Name()+":", "Different LinkTypes:", linkType, reader.LinkType()))
 		}
 
-		nextPacket, err := readNext(reader, inputFile)
+		nextPacket, err := readNext(reader, inputFile, cmdFlags.Verbose)
 		if err == nil {
 			heap.Push(&minTimeHeap, nextPacket)
 		}
 	}
 
-	if opts.Verbose {
+	if cmdFlags.Verbose {
 		fmt.Fprintf(os.Stderr, "merging %d input files of size %f GiB\n", minTimeHeap.Len(), float64(totalInputSizeBytes)/1024/1024/1024)
 		fmt.Fprintf(os.Stderr, "writing to %s\n", outputFile.Name())
 	}
@@ -125,7 +118,7 @@ func joincap(args []string) {
 	for minTimeHeap.Len() > 0 {
 		// find the earliest packet and write it to the output file
 		packet := heap.Pop(&minTimeHeap).(Packet)
-		write(writer, packet)
+		write(writer, packet, cmdFlags.Verbose)
 
 		var earliestHeapTime int64
 		if minTimeHeap.Len() > 0 {
@@ -133,14 +126,14 @@ func joincap(args []string) {
 		}
 		for {
 			// read the next packet from the source of the last written packet
-			nextPacket, err := readNext(packet.Reader, packet.InputFile)
+			nextPacket, err := readNext(packet.Reader, packet.InputFile, cmdFlags.Verbose)
 			if err == io.EOF {
 				break
 			}
 
 			if nextPacket.Timestamp <= earliestHeapTime {
 				// this is the earliest packet, write it to the output file
-				write(writer, nextPacket)
+				write(writer, nextPacket, cmdFlags.Verbose)
 				continue
 			}
 
@@ -151,26 +144,26 @@ func joincap(args []string) {
 	}
 }
 
-func readNext(reader *pcapgo.Reader, inputFile *os.File) (Packet, error) {
+func readNext(reader *pcapgo.Reader, inputFile *os.File, verbose bool) (Packet, error) {
 	for {
 		data, captureInfo, err := reader.ReadPacketData()
 		if err != nil {
 			if err == io.EOF {
-				if opts.Verbose {
+				if verbose {
 					fmt.Fprintf(os.Stderr, "%s: done\n", inputFile.Name())
 				}
 				inputFile.Close()
 
 				return Packet{}, err
 			}
-			if opts.Verbose {
+			if verbose {
 				fmt.Fprintf(os.Stderr, "%s: %v (skipping this packet)\n", inputFile.Name(), err)
 			}
 			// skip errors
 			continue
 		}
 		if len(data) == 0 {
-			if opts.Verbose {
+			if verbose {
 				fmt.Fprintf(os.Stderr, "%s: empty data (skipping this packet)\n", inputFile.Name())
 			}
 			// skip errors
@@ -186,10 +179,17 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File) (Packet, error) {
 	}
 }
 
-func write(writer *pcapgo.Writer, packet Packet) {
+func write(writer *pcapgo.Writer, packet Packet, verbose bool) {
 	err := writer.WritePacket(packet.CaptureInfo, packet.Data)
-	if err != nil && opts.Verbose {
+	if err != nil && verbose {
 		fmt.Fprintf(os.Stderr, "write error: %v (skipping this packet)\n", err)
 		// skip errors
 	}
+}
+
+func max(x, y uint32) uint32 {
+	if x > y {
+		return x
+	}
+	return y
 }
