@@ -27,7 +27,7 @@ if [[ $(free -m | awk '/Mem/{print $2}') -gt 6000 ]]; then
     sudo mount -t tmpfs -o size=3G tmpfs "$BENCHMARK_DIR"/_tmpfs/
 
     # copy pcaps to tmpfs
-    rsync -Ph "$BENCHMARK_DIR"/*.pcap "$BENCHMARK_DIR"/_tmpfs/
+    cp "$BENCHMARK_DIR"/*.pcap "$BENCHMARK_DIR"/_tmpfs/
 
     PCAPS_DIR="$BENCHMARK_DIR"/_tmpfs/
 fi
@@ -35,17 +35,17 @@ fi
 # print versions for joincap, mergecap, tcpslice
 echo mergecap:
 mergecap --version
-time mergecap -w - "$PCAPS_DIR"/*pcap | pv -f > /dev/null
+time mergecap -w - "$PCAPS_DIR"/*pcap | pv -fab 2>&1 > /dev/null | tail -1
 
 echo
 echo tcpslice:
 tcpslice --version
-time tcpslice -w /dev/stdout "$PCAPS_DIR"/*pcap | pv -f > /dev/null
+time tcpslice -w /dev/stdout "$PCAPS_DIR"/*pcap | pv -fab 2>&1 > /dev/null | tail -1
 
 echo
 echo joincap:
 joincap --version
-time joincap "$PCAPS_DIR"/*pcap | pv -f > /dev/null
+time joincap "$PCAPS_DIR"/*pcap | pv -fab 2>&1 > /dev/null | tail -1
 
 if [[ $(free -m | awk '/Mem/{print $2}') -gt 6000 ]]; then
     sleep 3

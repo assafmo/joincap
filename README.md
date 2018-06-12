@@ -65,9 +65,9 @@ Help Options:
 
 |              | Version | Speed    | Time     |
 | ------------ | ------- | -------- | -------- |
-| **mergecap** | 2.4.5   | 383MiB/s | 0m7.302s |
-| **tcpslice** | 1.2a3   | 409MiB/s | 0m6.495s |
-| **joincap**  | 0.8.2   | 359MiB/s | 0m8.061s |
+| **mergecap** | 2.4.5   | 597MiB/s | 0m5.573s |
+| **tcpslice** | 1.2a3   | 887MiB/s | 0m3.464s |
+| **joincap**  | 0.8.3   | 439MiB/s | 0m6.995s |
 
 - Merging 3 files with total size of 2.99994GiB.
-- Running on Linux 4.15.0-22-generic, with Intel(R) Core(TM) i3-6100 CPU @ 3.70GHz (with SSE4.2), with 3826 MB of physical memory, with locale C, with zlib 1.2.11.
+- Running on Linux 4.15.0-22-generic, with Intel(R) Core(TM) i5-8250U CPU @ 1.60GHz (with SSE4.2), with 7873 MB of physical memory, with locale C, with zlib 1.2.11.
