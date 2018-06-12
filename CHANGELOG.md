@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.8.1 (Jun 12, 2018)
+
+- skip empty packets (probably bad packet header)
+
 ## v0.8.0 (Jun 12, 2018)
 
 - make as little as possible heap memory allocations
