@@ -294,3 +294,23 @@ func TestIgnoreGarbageEndingOfPcap(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+// TestGzippedPcap gzipped pcap should merge just fine (this kills tcpslice)
+func TestGzippedPcap(t *testing.T) {
+	outputFile, err := ioutil.TempFile("", "joincap_output_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFile.Close()
+	defer os.Remove(outputFile.Name())
+
+	joincap([]string{"joincap",
+		"-w", outputFile.Name(),
+		"pcap_examples/ok.pcap.gz", okPcap})
+
+	testIsOrdered(t, outputFile.Name())
+
+	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap)*2 {
+		t.FailNow()
+	}
+}
