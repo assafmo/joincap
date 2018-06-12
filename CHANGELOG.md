@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.8.2 (Jun 12, 2018)
+
+- fix use inputFile after error on open
+
 ## v0.8.1 (Jun 12, 2018)
 
 - skip empty packets (probably bad packet header)
