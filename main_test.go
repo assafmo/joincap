@@ -9,6 +9,8 @@ import (
 	"github.com/google/gopacket/pcapgo"
 )
 
+const okPcap = "pcap_examples/ok.pcap"
+
 func packetCount(t *testing.T, pcapPath string) uint64 {
 	inputFile, err := os.Open(pcapPath)
 	if err != nil {
@@ -85,13 +87,11 @@ func TestCount(t *testing.T) {
 	outputFile.Close()
 	defer os.Remove(outputFile.Name())
 
-	inputFilePath := "pcap_examples/ok.pcap"
-
 	joincap([]string{"joincap",
 		"-w", outputFile.Name(),
-		inputFilePath, inputFilePath})
+		okPcap, okPcap})
 
-	if packetCount(t, inputFilePath)*2 != packetCount(t, outputFile.Name()) {
+	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap)*2 {
 		t.FailNow()
 	}
 }
@@ -106,13 +106,11 @@ func TestOrder(t *testing.T) {
 	outputFile.Close()
 	defer os.Remove(outputFile.Name())
 
-	inputFilePath := "pcap_examples/ok.pcap"
-
 	joincap([]string{"joincap",
 		"-w", outputFile.Name(),
-		inputFilePath, inputFilePath})
+		okPcap, okPcap})
 
-	testIsOrdered(t, inputFilePath)
+	testIsOrdered(t, okPcap)
 	testIsOrdered(t, outputFile.Name())
 }
 
@@ -144,16 +142,14 @@ func TestIgnorePacketWithCorruptHeader(t *testing.T) {
 	outputFile.Close()
 	defer os.Remove(outputFile.Name())
 
-	inputFilePath := "pcap_examples/ok.pcap"
-
-	// bad_first_header.pcap is ok.pcap with its first packet header ruined
 	joincap([]string{"joincap",
 		"-w", outputFile.Name(),
-		inputFilePath, "pcap_examples/bad_first_header.pcap"})
+		okPcap, "pcap_examples/bad_first_header.pcap"})
 
 	testIsOrdered(t, outputFile.Name())
 
-	if (packetCount(t, inputFilePath)*2)-1 != packetCount(t, outputFile.Name()) {
+	// bad_first_header.pcap is ok.pcap with its first packet header ruined
+	if (packetCount(t, okPcap)*2)-1 != packetCount(t, outputFile.Name()) {
 		t.FailNow()
 	}
 }
@@ -187,15 +183,13 @@ func TestIgnoreEmptyPcap(t *testing.T) {
 	outputFile.Close()
 	defer os.Remove(outputFile.Name())
 
-	inputFilePath := "pcap_examples/ok.pcap"
-
 	joincap([]string{"joincap",
 		"-w", outputFile.Name(),
-		inputFilePath, "pcap_examples/no_packets.pcap"})
+		okPcap, "pcap_examples/no_packets.pcap"})
 
 	testIsOrdered(t, outputFile.Name())
 
-	if packetCount(t, inputFilePath) != packetCount(t, outputFile.Name()) {
+	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
 		t.FailNow()
 	}
 }
@@ -209,15 +203,13 @@ func TestIgnoreInputFileTruncatedGlobalHeader(t *testing.T) {
 	outputFile.Close()
 	defer os.Remove(outputFile.Name())
 
-	inputFilePath := "pcap_examples/ok.pcap"
-
 	joincap([]string{"joincap",
 		"-w", outputFile.Name(),
-		inputFilePath, "pcap_examples/partial_global_header.pcap"})
+		okPcap, "pcap_examples/partial_global_header.pcap"})
 
 	testIsOrdered(t, outputFile.Name())
 
-	if packetCount(t, inputFilePath) != packetCount(t, outputFile.Name()) {
+	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
 		t.FailNow()
 	}
 }
@@ -231,15 +223,13 @@ func TestIgnoreInputFileTruncatedFirstPacketHeader(t *testing.T) {
 	outputFile.Close()
 	defer os.Remove(outputFile.Name())
 
-	inputFilePath := "pcap_examples/ok.pcap"
-
 	joincap([]string{"joincap",
 		"-w", outputFile.Name(),
-		"pcap_examples/partial_first_header.pcap", inputFilePath})
+		"pcap_examples/partial_first_header.pcap", okPcap})
 
 	testIsOrdered(t, outputFile.Name())
 
-	if packetCount(t, inputFilePath) != packetCount(t, outputFile.Name()) {
+	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
 		t.FailNow()
 	}
 }
@@ -253,15 +243,13 @@ func TestIgnoreInputFileDoesNotExists(t *testing.T) {
 	outputFile.Close()
 	defer os.Remove(outputFile.Name())
 
-	inputFilePath := "pcap_examples/ok.pcap"
-
 	joincap([]string{"joincap",
 		"-w", outputFile.Name(),
-		"/nothing/here", inputFilePath, "or_here"})
+		"/nothing/here", okPcap, "or_here"})
 
 	testIsOrdered(t, outputFile.Name())
 
-	if packetCount(t, inputFilePath) != packetCount(t, outputFile.Name()) {
+	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
 		t.FailNow()
 	}
 }
@@ -275,15 +263,34 @@ func TestIgnoreInputFileIsDirectory(t *testing.T) {
 	outputFile.Close()
 	defer os.Remove(outputFile.Name())
 
-	inputFilePath := "pcap_examples/ok.pcap"
-
 	joincap([]string{"joincap",
 		"-w", outputFile.Name(),
-		"pcap_examples", inputFilePath})
+		"pcap_examples", okPcap})
 
 	testIsOrdered(t, outputFile.Name())
 
-	if packetCount(t, inputFilePath) != packetCount(t, outputFile.Name()) {
+	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
+		t.FailNow()
+	}
+}
+
+// TestIgnoreGarbageEndingOfPcap garbage at end of pcap should be ignored (this kills tcpslice)
+func TestIgnoreGarbageEndingOfPcap(t *testing.T) {
+	outputFile, err := ioutil.TempFile("", "joincap_output_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFile.Close()
+	defer os.Remove(outputFile.Name())
+
+	joincap([]string{"joincap",
+		"-w", outputFile.Name(),
+		"pcap_examples/bad_end.pcap", okPcap})
+
+	testIsOrdered(t, outputFile.Name())
+
+	// bad_end.pcap is ok.pcap with the last packet header ruined and garbage appended to it
+	if packetCount(t, outputFile.Name()) != (packetCount(t, okPcap)*2)-1 {
 		t.FailNow()
 	}
 }
