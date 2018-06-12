@@ -15,4 +15,4 @@ cat /tmp/benchmark | grep -A 4 'joincap:' | awk '/joincap v/{version=$2} /<=>/{s
 echo
 
 echo - Merging $(ls "$BENCHMARK_DIR"/*pcap | wc -l) files with total size of $(ls -l "$BENCHMARK_DIR"/*pcap | awk '{sum+=$5} END{print sum/1024/1024/1024 "GiB"}').
-echo "- $(grep -A 2 Running /tmp/benchmark | tr -d '\n')"
+echo "- $(grep -A 2 Running /tmp/benchmark | tr '\n' ' ')"
