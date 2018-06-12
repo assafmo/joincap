@@ -4,3 +4,4 @@ _tmpfs
 debug
 debug.test
 !pcap_examples/*.pcap
+!pcap_examples/*.pcap.gz
