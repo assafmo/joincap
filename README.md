@@ -59,8 +59,6 @@ Application Options:
 
 Help Options:
   -h, --help     Show this help message
-
-joincap v0.7.3
 ```
 
 ## Benchmarks
