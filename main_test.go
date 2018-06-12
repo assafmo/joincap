@@ -265,3 +265,25 @@ func TestIgnoreInputFileDoesNotExists(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+// TestIgnoreInputFileIsDirectory directory as input file should be ignored
+func TestIgnoreInputFileIsDirectory(t *testing.T) {
+	outputFile, err := ioutil.TempFile("", "joincap_output_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFile.Close()
+	defer os.Remove(outputFile.Name())
+
+	inputFilePath := "pcap_examples/ok.pcap"
+
+	joincap([]string{"joincap",
+		"-w", outputFile.Name(),
+		"pcap_examples", inputFilePath})
+
+	testIsOrdered(t, outputFile.Name())
+
+	if packetCount(t, inputFilePath) != packetCount(t, outputFile.Name()) {
+		t.FailNow()
+	}
+}
