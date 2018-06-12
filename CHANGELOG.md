@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.8.3 (Jun 12, 2018)
+
+- cmdFlags no longer global
+- default snaplen
+
 ## v0.8.2 (Jun 12, 2018)
 
 - fix use inputFile after error on open
