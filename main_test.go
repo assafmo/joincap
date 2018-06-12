@@ -77,7 +77,9 @@ func TestCount(t *testing.T) {
 
 	inputFilePath := "pcap_examples/ok.pcap"
 
-	joincap([]string{"joincap", "-w", outputFile.Name(), inputFilePath, inputFilePath})
+	joincap([]string{"joincap",
+		"-w", outputFile.Name(),
+		inputFilePath, inputFilePath})
 
 	inputPacketCount, err := packetCount(inputFilePath)
 	if err != nil {
@@ -105,7 +107,9 @@ func TestOrder(t *testing.T) {
 
 	inputFilePath := "pcap_examples/ok.pcap"
 
-	joincap([]string{"joincap", "-w", outputFile.Name(), inputFilePath, inputFilePath})
+	joincap([]string{"joincap",
+		"-w", outputFile.Name(),
+		inputFilePath, inputFilePath})
 
 	isInputOrdered, err := isTimeOrdered(inputFilePath)
 	if err != nil {
@@ -121,5 +125,29 @@ func TestOrder(t *testing.T) {
 	}
 	if !isOutputOrdered {
 		t.FailNow()
+	}
+}
+
+// TestIgnoreInputWithCorruptGlobalHeader merging pcap with
+// a corrupt global header should be ignored
+func TestIgnoreInputWithCorruptGlobalHeader(t *testing.T) {
+	outputFile, err := ioutil.TempFile("", "joincap_output_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFile.Close()
+	defer os.Remove(outputFile.Name())
+
+	joincap([]string{"joincap",
+		"-w", outputFile.Name(),
+		"pcap_examples/bad_global.pcap"})
+
+	outputPacketCount, err := packetCount(outputFile.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if outputPacketCount != 0 {
+		t.Fatalf("outputPacketCount (%d) should be 0", outputPacketCount)
 	}
 }
