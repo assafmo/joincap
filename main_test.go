@@ -9,25 +9,25 @@ import (
 	"github.com/google/gopacket/pcapgo"
 )
 
-func packetCount(pcapPath string) (uint64, error) {
+func packetCount(t *testing.T, pcapPath string) uint64 {
 	inputFile, err := os.Open(pcapPath)
 	if err != nil {
-		return 0, err
+		t.Fatal(err)
 	}
 	defer inputFile.Close()
 
 	reader, err := pcapgo.NewReader(inputFile)
 	if err != nil {
-		return 0, err
+		t.Fatal(err)
 	}
 
 	var packetCount uint64
 	for {
 		_, _, err = reader.ReadPacketData()
 		if err == io.EOF {
-			return packetCount, nil
+			return packetCount
 		} else if err != nil {
-			return 0, err
+			t.Fatal(err)
 		}
 		packetCount++
 	}
@@ -64,6 +64,16 @@ func isTimeOrdered(pcapPath string) (bool, error) {
 	}
 }
 
+func testIsOrdered(t *testing.T, pcapPath string) {
+	isOutputOrdered, err := isTimeOrdered(pcapPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isOutputOrdered {
+		t.Fatal("out of order")
+	}
+}
+
 // TestCount packet count of merged pcap
 // should be the sum of the packet counts of the
 // input pcaps
@@ -81,17 +91,8 @@ func TestCount(t *testing.T) {
 		"-w", outputFile.Name(),
 		inputFilePath, inputFilePath})
 
-	inputPacketCount, err := packetCount(inputFilePath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	outputPacketCount, err := packetCount(outputFile.Name())
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if inputPacketCount*2 != outputPacketCount {
-		t.Fatalf("inputPacketCount*2 != outputPacketCount (%d != %d)\n", inputPacketCount*2, outputPacketCount)
+	if packetCount(t, inputFilePath)*2 != packetCount(t, outputFile.Name()) {
+		t.FailNow()
 	}
 }
 
@@ -111,21 +112,8 @@ func TestOrder(t *testing.T) {
 		"-w", outputFile.Name(),
 		inputFilePath, inputFilePath})
 
-	isInputOrdered, err := isTimeOrdered(inputFilePath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !isInputOrdered {
-		t.Fatalf("inputFile %s is not ordered by time\n", inputFilePath)
-	}
-
-	isOutputOrdered, err := isTimeOrdered(outputFile.Name())
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !isOutputOrdered {
-		t.Fatal("out of order")
-	}
+	testIsOrdered(t, inputFilePath)
+	testIsOrdered(t, outputFile.Name())
 }
 
 // TestIgnoreInputFileCorruptGlobalHeader merging pcap with
@@ -142,13 +130,8 @@ func TestIgnoreInputFileCorruptGlobalHeader(t *testing.T) {
 		"-w", outputFile.Name(),
 		"pcap_examples/bad_global.pcap"})
 
-	outputPacketCount, err := packetCount(outputFile.Name())
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if outputPacketCount != 0 {
-		t.Fatalf("outputPacketCount (%d) should be 0", outputPacketCount)
+	if packetCount(t, outputFile.Name()) != 0 {
+		t.FailNow()
 	}
 }
 
@@ -163,29 +146,15 @@ func TestIgnorePacketWithCorruptHeader(t *testing.T) {
 
 	inputFilePath := "pcap_examples/ok.pcap"
 
+	// bad_first_header.pcap is ok.pcap with its first packet header ruined
 	joincap([]string{"joincap",
 		"-w", outputFile.Name(),
 		inputFilePath, "pcap_examples/bad_first_header.pcap"})
 
-	isOutputOrdered, err := isTimeOrdered(outputFile.Name())
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !isOutputOrdered {
-		t.Fatal("out of order")
-	}
+	testIsOrdered(t, outputFile.Name())
 
-	inputPacketCount, err := packetCount(inputFilePath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	outputPacketCount, err := packetCount(outputFile.Name())
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if (inputPacketCount*2)-1 != outputPacketCount {
-		t.Fatalf("(inputPacketCount*2)-1 != outputPacketCount (%d != %d)\n", (inputPacketCount*2)-1, outputPacketCount)
+	if (packetCount(t, inputFilePath)*2)-1 != packetCount(t, outputFile.Name()) {
+		t.FailNow()
 	}
 }
 
@@ -202,21 +171,10 @@ func TestIgnoreTruncatedPacketEOF(t *testing.T) {
 		"-w", outputFile.Name(),
 		"pcap_examples/unexpected_eof_on_second_packet.pcap"})
 
-	isOutputOrdered, err := isTimeOrdered(outputFile.Name())
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !isOutputOrdered {
-		t.Fatal("out of order")
-	}
+	testIsOrdered(t, outputFile.Name())
 
-	outputPacketCount, err := packetCount(outputFile.Name())
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if outputPacketCount != 1 {
-		t.Fatalf("outputPacketCount (%d) != 1\n", outputPacketCount)
+	if packetCount(t, outputFile.Name()) != 1 {
+		t.FailNow()
 	}
 }
 
@@ -235,25 +193,10 @@ func TestIgnoreEmptyPcap(t *testing.T) {
 		"-w", outputFile.Name(),
 		inputFilePath, "pcap_examples/no_packets.pcap"})
 
-	isOutputOrdered, err := isTimeOrdered(outputFile.Name())
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !isOutputOrdered {
-		t.Fatal("out of order")
-	}
+	testIsOrdered(t, outputFile.Name())
 
-	inputPacketCount, err := packetCount(inputFilePath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	outputPacketCount, err := packetCount(outputFile.Name())
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if inputPacketCount != outputPacketCount {
-		t.Fatalf("inputPacketCount != outputPacketCount (%d != %d)\n", inputPacketCount, outputPacketCount)
+	if packetCount(t, inputFilePath) != packetCount(t, outputFile.Name()) {
+		t.FailNow()
 	}
 }
 
@@ -266,17 +209,16 @@ func TestIgnoreInputFileTruncatedGlobalHeader(t *testing.T) {
 	outputFile.Close()
 	defer os.Remove(outputFile.Name())
 
+	inputFilePath := "pcap_examples/ok.pcap"
+
 	joincap([]string{"joincap",
 		"-w", outputFile.Name(),
-		"pcap_examples/partial_global_header.pcap"})
+		inputFilePath, "pcap_examples/partial_global_header.pcap"})
 
-	outputPacketCount, err := packetCount(outputFile.Name())
-	if err != nil {
-		t.Fatal(err)
-	}
+	testIsOrdered(t, outputFile.Name())
 
-	if outputPacketCount != 0 {
-		t.Fatalf("outputPacketCount (%d) != 0\n", outputPacketCount)
+	if packetCount(t, inputFilePath) != packetCount(t, outputFile.Name()) {
+		t.FailNow()
 	}
 }
 
@@ -289,16 +231,15 @@ func TestIgnoreInputFileTruncatedFirstPacketHeader(t *testing.T) {
 	outputFile.Close()
 	defer os.Remove(outputFile.Name())
 
+	inputFilePath := "pcap_examples/ok.pcap"
+
 	joincap([]string{"joincap",
 		"-w", outputFile.Name(),
-		"pcap_examples/partial_first_header.pcap"})
+		"pcap_examples/partial_first_header.pcap", inputFilePath})
 
-	outputPacketCount, err := packetCount(outputFile.Name())
-	if err != nil {
-		t.Fatal(err)
-	}
+	testIsOrdered(t, outputFile.Name())
 
-	if outputPacketCount != 0 {
-		t.Fatalf("outputPacketCount (%d) != 0\n", outputPacketCount)
+	if packetCount(t, inputFilePath) != packetCount(t, outputFile.Name()) {
+		t.FailNow()
 	}
 }
