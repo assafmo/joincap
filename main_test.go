@@ -167,6 +167,14 @@ func TestIgnorePacketWithCorruptHeader(t *testing.T) {
 		"-w", outputFile.Name(),
 		inputFilePath, "pcap_examples/bad_first_header.pcap"})
 
+	isOutputOrdered, err := isTimeOrdered(outputFile.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isOutputOrdered {
+		t.FailNow()
+	}
+
 	inputPacketCount, err := packetCount(inputFilePath)
 	if err != nil {
 		t.Fatal(err)
@@ -178,5 +186,36 @@ func TestIgnorePacketWithCorruptHeader(t *testing.T) {
 
 	if (inputPacketCount*2)-1 != outputPacketCount {
 		t.Fatalf("(inputPacketCount*2)-1 != outputPacketCount (%d != %d)\n", (inputPacketCount*2)-1, outputPacketCount)
+	}
+}
+
+// TestIgnoreTruncatedPacket truncated packet (EOF) should be ignored
+func TestIgnoreTruncatedPacketEOF(t *testing.T) {
+	outputFile, err := ioutil.TempFile("", "joincap_output_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFile.Close()
+	defer os.Remove(outputFile.Name())
+
+	joincap([]string{"joincap",
+		"-w", outputFile.Name(),
+		"pcap_examples/unexpected_eof_on_second_packet.pcap"})
+
+	isOutputOrdered, err := isTimeOrdered(outputFile.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isOutputOrdered {
+		t.FailNow()
+	}
+
+	outputPacketCount, err := packetCount(outputFile.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if outputPacketCount != 1 {
+		t.Fatalf("outputPacketCount (%d) != 1\n", outputPacketCount)
 	}
 }
