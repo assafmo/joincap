@@ -12,7 +12,7 @@ import (
 
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcapgo"
-	"github.com/jessevdk/go-flags"
+	flags "github.com/jessevdk/go-flags"
 )
 
 var opts struct {
@@ -38,7 +38,11 @@ func main() {
 	// 	log.Println(http.ListenAndServe("localhost:8080", nil))
 	// }()
 
-	_, err := flags.ParseArgs(&opts, os.Args)
+	joincap(os.Args)
+}
+
+func joincap(args []string) {
+	_, err := flags.ParseArgs(&opts, args)
 
 	if err != nil {
 		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
