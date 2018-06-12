@@ -83,7 +83,7 @@ func main() {
 		inputFile, err := os.Open(inputPcapPath)
 		if err != nil {
 			if opts.Verbose {
-				fmt.Fprintf(os.Stderr, "%s: %v (skipping this file)\n", inputFile.Name(), err)
+				fmt.Fprintf(os.Stderr, "%s: %v (skipping this file)\n", inputPcapPath, err)
 			}
 			continue
 		}
