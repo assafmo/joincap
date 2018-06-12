@@ -9,6 +9,7 @@ import (
 
 // Packet to be merged
 type Packet struct {
+	Timestamp   int64
 	CaptureInfo gopacket.CaptureInfo
 	Data        []byte
 	Reader      *pcapgo.Reader
@@ -20,7 +21,7 @@ type PacketHeap []Packet
 
 func (h PacketHeap) Len() int { return len(h) }
 func (h PacketHeap) Less(i, j int) bool {
-	return h[i].CaptureInfo.Timestamp.UnixNano() < h[j].CaptureInfo.Timestamp.UnixNano()
+	return h[i].Timestamp <= h[j].Timestamp
 }
 func (h PacketHeap) Swap(i, j int) { h[i], h[j] = h[j], h[i] }
 

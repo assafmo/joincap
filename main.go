@@ -125,7 +125,7 @@ func main() {
 
 		var earliestHeapTime int64
 		if minTimeHeap.Len() > 0 {
-			earliestHeapTime = minTimeHeap[0].CaptureInfo.Timestamp.UnixNano()
+			earliestHeapTime = minTimeHeap[0].Timestamp
 		}
 		for {
 			// read the next packet from the source of the last written packet
@@ -134,7 +134,7 @@ func main() {
 				break
 			}
 
-			if nextPacket.CaptureInfo.Timestamp.UnixNano() <= earliestHeapTime {
+			if nextPacket.Timestamp <= earliestHeapTime {
 				// this is the earliest packet, write it to the output file
 				write(writer, nextPacket)
 				continue
@@ -165,8 +165,16 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File) (Packet, error) {
 			// skip errors
 			continue
 		}
+		if len(data) == 0 {
+			if opts.Verbose {
+				fmt.Fprintf(os.Stderr, "%s: empty data (skipping this packet)\n", inputFile.Name())
+			}
+			// skip errors
+			continue
+		}
 
 		return Packet{
+			Timestamp:   captureInfo.Timestamp.UnixNano(),
 			CaptureInfo: captureInfo,
 			Data:        data,
 			Reader:      reader,
