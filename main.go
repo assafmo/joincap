@@ -56,7 +56,7 @@ func joincap(args []string) {
 		fmt.Fprintf(os.Stderr, "joincap v%s\n", version)
 	}
 
-	minTimeHeap := PacketHeap{}
+	minTimeHeap := packetHeap{}
 	heap.Init(&minTimeHeap)
 
 	outputFile := os.Stdout
@@ -117,8 +117,8 @@ func joincap(args []string) {
 	writer.WriteFileHeader(snaplen, linkType)
 	for minTimeHeap.Len() > 0 {
 		// find the earliest packet and write it to the output file
-		packet := heap.Pop(&minTimeHeap).(Packet)
-		write(writer, packet, cmdFlags.Verbose)
+		earliestPacket := heap.Pop(&minTimeHeap).(packet)
+		write(writer, earliestPacket, cmdFlags.Verbose)
 
 		var earliestHeapTime int64
 		if minTimeHeap.Len() > 0 {
@@ -126,7 +126,7 @@ func joincap(args []string) {
 		}
 		for {
 			// read the next packet from the source of the last written packet
-			nextPacket, err := readNext(packet.Reader, packet.InputFile, cmdFlags.Verbose)
+			nextPacket, err := readNext(earliestPacket.Reader, earliestPacket.InputFile, cmdFlags.Verbose)
 			if err == io.EOF {
 				break
 			}
@@ -144,7 +144,7 @@ func joincap(args []string) {
 	}
 }
 
-func readNext(reader *pcapgo.Reader, inputFile *os.File, verbose bool) (Packet, error) {
+func readNext(reader *pcapgo.Reader, inputFile *os.File, verbose bool) (packet, error) {
 	for {
 		data, captureInfo, err := reader.ReadPacketData()
 		if err != nil {
@@ -154,7 +154,7 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, verbose bool) (Packet, 
 				}
 				inputFile.Close()
 
-				return Packet{}, err
+				return packet{}, err
 			}
 			if verbose {
 				fmt.Fprintf(os.Stderr, "%s: %v (skipping this packet)\n", inputFile.Name(), err)
@@ -170,7 +170,7 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, verbose bool) (Packet, 
 			continue
 		}
 
-		return Packet{
+		return packet{
 			Timestamp:   captureInfo.Timestamp.UnixNano(),
 			CaptureInfo: captureInfo,
 			Data:        data,
@@ -179,8 +179,8 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, verbose bool) (Packet, 
 	}
 }
 
-func write(writer *pcapgo.Writer, packet Packet, verbose bool) {
-	err := writer.WritePacket(packet.CaptureInfo, packet.Data)
+func write(writer *pcapgo.Writer, packetToWrite packet, verbose bool) {
+	err := writer.WritePacket(packetToWrite.CaptureInfo, packetToWrite.Data)
 	if err != nil && verbose {
 		fmt.Fprintf(os.Stderr, "write error: %v (skipping this packet)\n", err)
 		// skip errors
