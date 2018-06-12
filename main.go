@@ -15,7 +15,7 @@ import (
 	flags "github.com/jessevdk/go-flags"
 )
 
-const version = "0.8.2"
+const version = "0.8.3"
 
 func main() {
 	// go func() {
