@@ -270,13 +270,28 @@ func TestIgnoreInputFileTruncatedGlobalHeader(t *testing.T) {
 		"-w", outputFile.Name(),
 		"pcap_examples/partial_global_header.pcap"})
 
-	isOutputOrdered, err := isTimeOrdered(outputFile.Name())
+	outputPacketCount, err := packetCount(outputFile.Name())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !isOutputOrdered {
-		t.Fatal("out of order")
+
+	if outputPacketCount != 0 {
+		t.Fatalf("outputPacketCount (%d) != 0\n", outputPacketCount)
 	}
+}
+
+// TestIgnoreInputFileTruncatedFirstPacketHeader pcap without full first packet header (24 < size < 40 bytes) should be ignored
+func TestIgnoreInputFileTruncatedFirstPacketHeader(t *testing.T) {
+	outputFile, err := ioutil.TempFile("", "joincap_output_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFile.Close()
+	defer os.Remove(outputFile.Name())
+
+	joincap([]string{"joincap",
+		"-w", outputFile.Name(),
+		"pcap_examples/partial_first_header.pcap"})
 
 	outputPacketCount, err := packetCount(outputFile.Name())
 	if err != nil {
