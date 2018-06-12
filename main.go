@@ -43,7 +43,7 @@ func main() {
 	if err != nil {
 		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
 			// -h flasg, print version and help and exit
-			fmt.Println("joincap v" + version)
+			fmt.Printf("joincap v%s\n", version)
 			os.Exit(0)
 		} else {
 			panic(err)
@@ -52,11 +52,11 @@ func main() {
 
 	if opts.Version {
 		// -v flag, print version and exit
-		fmt.Println("joincap v" + version)
+		fmt.Printf("joincap v%s\n", version)
 		os.Exit(0)
 	}
 	if opts.Verbose {
-		fmt.Fprintln(os.Stderr, "joincap v"+version)
+		fmt.Fprintf(os.Stderr, "joincap v%s\n", version)
 	}
 
 	minTimeHeap := PacketHeap{}
@@ -66,7 +66,7 @@ func main() {
 	if opts.OutputFilePath != "-" {
 		outputFile, err = os.Create(opts.OutputFilePath)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, opts.OutputFilePath+":")
+			fmt.Fprintf(os.Stderr, "%s: %v\n", opts.OutputFilePath, err)
 			panic(err)
 		}
 		defer outputFile.Close()
@@ -83,7 +83,7 @@ func main() {
 		inputFile, err := os.Open(inputPcapPath)
 		if err != nil {
 			if opts.Verbose {
-				fmt.Fprintln(os.Stderr, inputFile.Name()+":", err, "(skipping this file)")
+				fmt.Fprintf(os.Stderr, "%s: %v (skipping this file)\n", inputFile.Name(), err)
 			}
 			continue
 		}
@@ -91,7 +91,7 @@ func main() {
 		reader, err := pcapgo.NewReader(inputFile)
 		if err != nil {
 			if opts.Verbose {
-				fmt.Fprintln(os.Stderr, inputFile.Name()+":", err, "(skipping this file)")
+				fmt.Fprintf(os.Stderr, "%s: %v (skipping this file)\n", inputFile.Name(), err)
 			}
 			continue
 		}
@@ -153,14 +153,14 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File) (Packet, error) {
 		if err != nil {
 			if err == io.EOF {
 				if opts.Verbose {
-					fmt.Fprintln(os.Stderr, inputFile.Name()+": done")
+					fmt.Fprintf(os.Stderr, "%s: done\n", inputFile.Name())
 				}
 				inputFile.Close()
 
 				return Packet{}, err
 			}
 			if opts.Verbose {
-				fmt.Fprintln(os.Stderr, inputFile.Name()+":", err, "(skipping this packet)")
+				fmt.Fprintf(os.Stderr, "%s: %v (skipping this packet)\n", inputFile.Name(), err)
 			}
 			// skip errors
 			continue
@@ -177,7 +177,7 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File) (Packet, error) {
 func write(writer *pcapgo.Writer, packet Packet) {
 	err := writer.WritePacket(packet.CaptureInfo, packet.Data)
 	if err != nil && opts.Verbose {
-		fmt.Fprintln(os.Stderr, err, "(skipping this packet)")
+		fmt.Fprintf(os.Stderr, "write error: %v (skipping this packet)\n", err)
 		// skip errors
 	}
 }
