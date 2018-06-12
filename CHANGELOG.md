@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.8.0 (Jun 12, 2018)
+
+- make as little as possible heap memory allocations
+- close input files as soon as we are done with it
+
 ## v0.7.6 (Jun 11, 2018)
 
 - read faster with ReadPacketDataNoCopy (currently from github.com/assafmo/gopacket, until the PR is accepted)
