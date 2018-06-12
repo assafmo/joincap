@@ -81,7 +81,7 @@ func joincap(args []string) {
 	writer := pcapgo.NewWriter(bufferedFileWriter)
 
 	var totalInputSizeBytes int64
-	var snaplen uint32
+	var snaplen uint32 = 65536
 	var linkType layers.LinkType
 	for _, inputPcapPath := range opts.Rest.InFiles[1:] {
 		inputFile, err := os.Open(inputPcapPath)
