@@ -40,11 +40,9 @@ func main() {
 
 	_, err := flags.ParseArgs(&opts, os.Args)
 
-	// if -h or -V then print to stdout and exit
-	// else print messages to stderr (avoids conflicts with outputFile)
 	if err != nil {
 		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
-			// print version and help and exit
+			// -h flasg, print version and help and exit
 			fmt.Println("joincap v" + version)
 			os.Exit(0)
 		} else {
@@ -53,7 +51,7 @@ func main() {
 	}
 
 	if opts.Version {
-		// print version and exit
+		// -v flag, print version and exit
 		fmt.Println("joincap v" + version)
 		os.Exit(0)
 	}
@@ -73,10 +71,10 @@ func main() {
 		}
 		defer outputFile.Close()
 	}
-	bufferedWriter := bufio.NewWriter(outputFile)
-	defer bufferedWriter.Flush()
+	bufferedFileWriter := bufio.NewWriter(outputFile)
+	defer bufferedFileWriter.Flush()
 
-	writer := pcapgo.NewWriter(bufferedWriter)
+	writer := pcapgo.NewWriter(bufferedFileWriter)
 
 	var totalInputSizeBytes int64
 	var snaplen uint32
