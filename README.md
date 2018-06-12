@@ -2,6 +2,8 @@
 
 Merge multiple pcap files together, gracefully.
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/assafmo/joincap)](https://goreportcard.com/report/github.com/assafmo/joincap)
+
 ## Why?
 
 I believe skipping corrupt packets is better than failing the entire merge job.  
