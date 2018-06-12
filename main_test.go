@@ -124,7 +124,7 @@ func TestOrder(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !isOutputOrdered {
-		t.FailNow()
+		t.Fatal("out of order")
 	}
 }
 
@@ -172,7 +172,7 @@ func TestIgnorePacketWithCorruptHeader(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !isOutputOrdered {
-		t.FailNow()
+		t.Fatal("out of order")
 	}
 
 	inputPacketCount, err := packetCount(inputFilePath)
@@ -207,7 +207,7 @@ func TestIgnoreTruncatedPacketEOF(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !isOutputOrdered {
-		t.FailNow()
+		t.Fatal("out of order")
 	}
 
 	outputPacketCount, err := packetCount(outputFile.Name())
@@ -217,5 +217,42 @@ func TestIgnoreTruncatedPacketEOF(t *testing.T) {
 
 	if outputPacketCount != 1 {
 		t.Fatalf("outputPacketCount (%d) != 1\n", outputPacketCount)
+	}
+}
+
+// TestIgnoreEmptyPcap pcap without packets should be ignored
+func TestIgnoreEmptyPcap(t *testing.T) {
+	outputFile, err := ioutil.TempFile("", "joincap_output_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFile.Close()
+	defer os.Remove(outputFile.Name())
+
+	inputFilePath := "pcap_examples/ok.pcap"
+
+	joincap([]string{"joincap",
+		"-w", outputFile.Name(),
+		inputFilePath, "pcap_examples/no_packets.pcap"})
+
+	isOutputOrdered, err := isTimeOrdered(outputFile.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isOutputOrdered {
+		t.Fatal("out of order")
+	}
+
+	inputPacketCount, err := packetCount(inputFilePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputPacketCount, err := packetCount(outputFile.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if inputPacketCount != outputPacketCount {
+		t.Fatalf("inputPacketCount != outputPacketCount (%d != %d)\n", inputPacketCount, outputPacketCount)
 	}
 }
