@@ -25,13 +25,13 @@ When using `tcpslice` or `mergecap` sometimes `pcapfix` is needed to fix bad inp
     - We have to mind the command line character limit (in case of long pathnames)
     - Doesn't work for `tcpslice` (seeks the last packets to calculate time ranges - cannot do this with pipes)
 
-## Install
+## Installation
 
 ```bash
 go get -u github.com/assafmo/joincap
 ```
 
-## Use
+## Basic Usage
 
 ```bash
 Usage:
