@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/assafmo/gopacket/pcapgo"
 	"github.com/google/gopacket"
 )
@@ -10,7 +12,8 @@ type Packet struct {
 	CaptureInfo *gopacket.CaptureInfo
 	Data        *[]byte
 	Reader      *pcapgo.Reader
-	PcapPath    *string
+	PcapPath    string
+	PcapFile    *os.File
 }
 
 // PacketHeap is a minimum heap of packets ordered by timestamp

@@ -83,19 +83,18 @@ func main() {
 	var snaplen uint32
 	var linkType layers.LinkType
 	for _, pcapPath := range opts.Rest.InFiles[1:] {
-		f, err := os.Open(pcapPath)
+		pcapFile, err := os.Open(pcapPath)
 		if err != nil {
 			if opts.Verbose {
 				fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skipping this file)")
 			}
 			continue
 		}
-		defer f.Close()
 
-		fStat, _ := f.Stat()
+		fStat, _ := pcapFile.Stat()
 		totalInputSizeBytes += fStat.Size()
 
-		pcapReader, err := pcapgo.NewReader(f)
+		pcapReader, err := pcapgo.NewReader(pcapFile)
 		if err != nil {
 			if opts.Verbose {
 				fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skipping this file)")
@@ -114,6 +113,10 @@ func main() {
 			data, captureInfo, err := pcapReader.ReadPacketDataNoCopy()
 			if err != nil {
 				if err == io.EOF {
+					if opts.Verbose {
+						fmt.Fprintln(os.Stderr, pcapPath+": done")
+					}
+					pcapFile.Close()
 					break
 				}
 				if opts.Verbose {
@@ -122,7 +125,12 @@ func main() {
 				// skip errors
 				continue
 			}
-			heap.Push(minTimeHeap, &Packet{captureInfo, data, pcapReader, &pcapPath})
+			heap.Push(minTimeHeap, &Packet{
+				CaptureInfo: captureInfo,
+				Data:        data,
+				Reader:      pcapReader,
+				PcapPath:    pcapPath,
+				PcapFile:    pcapFile})
 			break
 		}
 	}
@@ -149,10 +157,14 @@ func main() {
 			data, captureInfo, err := packet.Reader.ReadPacketDataNoCopy()
 			if err != nil {
 				if err == io.EOF {
+					if opts.Verbose {
+						fmt.Fprintln(os.Stderr, packet.PcapPath+": done")
+					}
+					packet.PcapFile.Close()
 					break
 				}
 				if opts.Verbose {
-					fmt.Fprintln(os.Stderr, *packet.PcapPath+":", err, "(skipping this packet)")
+					fmt.Fprintln(os.Stderr, packet.PcapPath+":", err, "(skipping this packet)")
 				}
 				// skip errors
 				continue
@@ -163,7 +175,12 @@ func main() {
 				continue
 			}
 
-			heap.Push(minTimeHeap, &Packet{captureInfo, data, packet.Reader, packet.PcapPath})
+			heap.Push(minTimeHeap, &Packet{
+				CaptureInfo: captureInfo,
+				Data:        data,
+				Reader:      packet.Reader,
+				PcapPath:    packet.PcapPath,
+				PcapFile:    packet.PcapFile})
 			break
 		}
 	}
