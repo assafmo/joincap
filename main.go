@@ -10,9 +10,8 @@ import (
 	// _ "net/http/pprof"
 	"os"
 
-	"github.com/assafmo/gopacket/pcapgo"
-	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
+	"github.com/google/gopacket/pcapgo"
 	"github.com/jessevdk/go-flags"
 )
 
@@ -32,7 +31,7 @@ func max(x, y uint32) uint32 {
 	return y
 }
 
-const version = "0.7.6"
+const version = "0.8.0"
 
 func main() {
 	// go func() {
@@ -62,8 +61,8 @@ func main() {
 		fmt.Fprintln(os.Stderr, "joincap v"+version)
 	}
 
-	minTimeHeap := &PacketHeap{}
-	heap.Init(minTimeHeap)
+	minTimeHeap := PacketHeap{}
+	heap.Init(&minTimeHeap)
 
 	outputFile := os.Stdout
 	if opts.OutputFilePath != "-" {
@@ -77,61 +76,41 @@ func main() {
 	bufferedWriter := bufio.NewWriter(outputFile)
 	defer bufferedWriter.Flush()
 
-	pcapWriter := pcapgo.NewWriter(bufferedWriter)
+	writer := pcapgo.NewWriter(bufferedWriter)
 
 	var totalInputSizeBytes int64
 	var snaplen uint32
 	var linkType layers.LinkType
-	for _, pcapPath := range opts.Rest.InFiles[1:] {
-		pcapFile, err := os.Open(pcapPath)
+	for _, inputPcapPath := range opts.Rest.InFiles[1:] {
+		inputFile, err := os.Open(inputPcapPath)
 		if err != nil {
 			if opts.Verbose {
-				fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skipping this file)")
+				fmt.Fprintln(os.Stderr, inputFile.Name()+":", err, "(skipping this file)")
 			}
 			continue
 		}
 
-		fStat, _ := pcapFile.Stat()
+		reader, err := pcapgo.NewReader(inputFile)
+		if err != nil {
+			if opts.Verbose {
+				fmt.Fprintln(os.Stderr, inputFile.Name()+":", err, "(skipping this file)")
+			}
+			continue
+		}
+
+		fStat, _ := inputFile.Stat()
 		totalInputSizeBytes += fStat.Size()
 
-		pcapReader, err := pcapgo.NewReader(pcapFile)
-		if err != nil {
-			if opts.Verbose {
-				fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skipping this file)")
-			}
-			continue
-		}
-
-		snaplen = max(snaplen, pcapReader.Snaplen())
+		snaplen = max(snaplen, reader.Snaplen())
 		if linkType == layers.LinkTypeNull {
-			linkType = pcapReader.LinkType()
-		} else if linkType != pcapReader.LinkType() {
-			panic(fmt.Sprintln(pcapPath+":", "Different LinkTypes:", linkType, pcapReader.LinkType()))
+			linkType = reader.LinkType()
+		} else if linkType != reader.LinkType() {
+			panic(fmt.Sprintln(inputFile.Name()+":", "Different LinkTypes:", linkType, reader.LinkType()))
 		}
 
-		for {
-			data, captureInfo, err := pcapReader.ReadPacketDataNoCopy()
-			if err != nil {
-				if err == io.EOF {
-					if opts.Verbose {
-						fmt.Fprintln(os.Stderr, pcapPath+": done")
-					}
-					pcapFile.Close()
-					break
-				}
-				if opts.Verbose {
-					fmt.Fprintln(os.Stderr, pcapPath+":", err, "(skipping this packet)")
-				}
-				// skip errors
-				continue
-			}
-			heap.Push(minTimeHeap, &Packet{
-				CaptureInfo: captureInfo,
-				Data:        data,
-				Reader:      pcapReader,
-				PcapPath:    pcapPath,
-				PcapFile:    pcapFile})
-			break
+		nextPacket, err := readNext(reader, inputFile)
+		if err == nil {
+			heap.Push(&minTimeHeap, nextPacket)
 		}
 	}
 
@@ -140,54 +119,65 @@ func main() {
 		fmt.Fprintf(os.Stderr, "writing to %s\n", outputFile.Name())
 	}
 
-	pcapWriter.WriteFileHeader(snaplen, linkType)
+	writer.WriteFileHeader(snaplen, linkType)
 	for minTimeHeap.Len() > 0 {
 		// find the earliest packet and write it to the output file
-		packet := heap.Pop(minTimeHeap).(*Packet)
-		write(pcapWriter, packet.CaptureInfo, packet.Data)
+		packet := heap.Pop(&minTimeHeap).(Packet)
+		write(writer, packet)
 
-		// read the next packet from the source of the last written packet.
-		// if this is the earliest packet, write it to the output file
-		// else push it to the heap
 		var earliestHeapTime int64
 		if minTimeHeap.Len() > 0 {
-			earliestHeapTime = (*minTimeHeap)[0].CaptureInfo.Timestamp.UnixNano()
+			earliestHeapTime = minTimeHeap[0].CaptureInfo.Timestamp.UnixNano()
 		}
 		for {
-			data, captureInfo, err := packet.Reader.ReadPacketDataNoCopy()
-			if err != nil {
-				if err == io.EOF {
-					if opts.Verbose {
-						fmt.Fprintln(os.Stderr, packet.PcapPath+": done")
-					}
-					packet.PcapFile.Close()
-					break
-				}
-				if opts.Verbose {
-					fmt.Fprintln(os.Stderr, packet.PcapPath+":", err, "(skipping this packet)")
-				}
-				// skip errors
+			// read the next packet from the source of the last written packet
+			nextPacket, err := readNext(packet.Reader, packet.InputFile)
+			if err == io.EOF {
+				break
+			}
+
+			if nextPacket.CaptureInfo.Timestamp.UnixNano() <= earliestHeapTime {
+				// this is the earliest packet, write it to the output file
+				write(writer, nextPacket)
 				continue
 			}
 
-			if captureInfo.Timestamp.UnixNano() <= earliestHeapTime {
-				write(pcapWriter, captureInfo, data)
-				continue
-			}
-
-			heap.Push(minTimeHeap, &Packet{
-				CaptureInfo: captureInfo,
-				Data:        data,
-				Reader:      packet.Reader,
-				PcapPath:    packet.PcapPath,
-				PcapFile:    packet.PcapFile})
+			// this is not the earliest packet, push it to the heap for sorting
+			heap.Push(&minTimeHeap, nextPacket)
 			break
 		}
 	}
 }
 
-func write(pcapWriter *pcapgo.Writer, captureInfo *gopacket.CaptureInfo, data *[]byte) {
-	err := pcapWriter.WritePacket(*captureInfo, *data)
+func readNext(reader *pcapgo.Reader, inputFile *os.File) (Packet, error) {
+	for {
+		data, captureInfo, err := reader.ReadPacketData()
+		if err != nil {
+			if err == io.EOF {
+				if opts.Verbose {
+					fmt.Fprintln(os.Stderr, inputFile.Name()+": done")
+				}
+				inputFile.Close()
+
+				return Packet{}, err
+			}
+			if opts.Verbose {
+				fmt.Fprintln(os.Stderr, inputFile.Name()+":", err, "(skipping this packet)")
+			}
+			// skip errors
+			continue
+		}
+
+		return Packet{
+			CaptureInfo: captureInfo,
+			Data:        data,
+			Reader:      reader,
+			InputFile:   inputFile}, nil
+	}
+}
+
+func write(writer *pcapgo.Writer, packet Packet) {
+	err := writer.WritePacket(packet.CaptureInfo, packet.Data)
 	if err != nil && opts.Verbose {
 		fmt.Fprintln(os.Stderr, err, "(skipping this packet)")
 		// skip errors

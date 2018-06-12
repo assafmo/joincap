@@ -63,9 +63,9 @@ joincap v0.7.3
 
 |              | Version | Speed    | Time     |
 | ------------ | ------- | -------- | -------- |
-| **mergecap** | 2.4.5   | 356MiB/s | 0m5.735s |
-| **tcpslice** | 1.2a3   | 591MiB/s | 0m3.820s |
-| **joincap**  | 0.7.6   | 295MiB/s | 0m7.609s |
+| **mergecap** | 2.4.5   | 357MiB/s | 0m6.899s |
+| **tcpslice** | 1.2a3   | 494MiB/s | 0m6.111s |
+| **joincap**  | 0.8.0   | 372MiB/s | 0m7.747s |
 
 - Merging 3 files with total size of 2.99994GiB.
-- Running on Linux 4.15.0-22-generic, with Intel(R) Core(TM) i5-8250U CPU @1.60GHz (with SSE4.2), with 7873 MB of physical memory, with locale C, with zlib1.2.11.
+- Running on Linux 4.15.0-22-generic, with Intel(R) Core(TM) i3-6100 CPU @ 3.70GHz(with SSE4.2), with3826 MB of physical memory, with locale C, with zlib 1.2.11.
