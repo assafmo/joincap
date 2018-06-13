@@ -40,7 +40,7 @@ time mergecap -w - "$PCAPS_DIR"/*pcap | pv -fab 2>&1 > /dev/null | tail -1
 echo
 echo tcpslice:
 tcpslice --version
-time tcpslice -w /dev/stdout "$PCAPS_DIR"/*pcap | pv -fab 2>&1 > /dev/null | tail -1
+time tcpslice -D -w /dev/stdout "$PCAPS_DIR"/*pcap | pv -fab 2>&1 > /dev/null | tail -1
 
 echo
 echo joincap:
