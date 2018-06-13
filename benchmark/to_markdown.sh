@@ -2,7 +2,9 @@
 
 BENCHMARK_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# ( cd "$BENCHMARK_DIR" ; ./benchmark.sh > /tmp/benchmark 2>&1 )
+export TO_MARKDOWN=true
+
+( cd "$BENCHMARK_DIR" ; ./benchmark.sh > /tmp/benchmark 2>&1 )
 
 echo '| | Version | Speed | Time |'
 echo '| --- | --- | --- | --- |'
