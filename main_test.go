@@ -74,6 +74,28 @@ func isTimeOrdered(pcapPath string) (bool, error) {
 	}
 }
 
+// TestHelperIsTimeOrderedTrue test the helper function isTimeOrdered for positive value
+func TestHelperIsTimeOrderedTrue(t *testing.T) {
+	isOutputOrdered, err := isTimeOrdered(okPcap)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isOutputOrdered {
+		t.FailNow()
+	}
+}
+
+// TestHelperIsTimeOrderedTrue test the helper function isTimeOrdered for negative value
+func TestHelperIsTimeOrderedFalse(t *testing.T) {
+	isOutputOrdered, err := isTimeOrdered("pcap_examples/out_of_order.pcap")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if isOutputOrdered {
+		t.FailNow()
+	}
+}
+
 func testIsOrdered(t *testing.T, pcapPath string) {
 	isOutputOrdered, err := isTimeOrdered(pcapPath)
 	if err != nil {
