@@ -35,6 +35,14 @@ func packetCount(t *testing.T, pcapPath string) uint64 {
 	}
 }
 
+// TestHelperPacketCount test the helper function packetCount
+func TestHelperPacketCount(t *testing.T) {
+	// tcpdump -r pcap_examples/ok.pcap -qn | wc -l
+	if packetCount(t, okPcap) != 851 {
+		t.FailNow()
+	}
+}
+
 func isTimeOrdered(pcapPath string) (bool, error) {
 	inputFile, err := os.Open(pcapPath)
 	if err != nil {
