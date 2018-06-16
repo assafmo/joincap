@@ -22,7 +22,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
  - OS: [e.g. Linux]
- - `go version`
+ - `go version` [e.g. 1.10.2]
  - `joincap --version` [e.g. 0.7.1]
 
 **Additional context**
