@@ -358,6 +358,7 @@ func TestIgnoreTooSmallSnaplen(t *testing.T) {
 		"-w", outputFile.Name(),
 		"pcap_examples/very_small_snaplen.pcap"})
 
+	// snaplen is edited to be way to small
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
 		t.FailNow()
 	}
@@ -377,6 +378,7 @@ func TestIgnorePacketsWithTimeEarlierThanFirst(t *testing.T) {
 		"-w", outputFile.Name(),
 		"pcap_examples/second_packet_time_is_too_small.pcap"})
 
+	// the second packet is edited to have 1970 date...
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap)-1 {
 		t.FailNow()
 	}
