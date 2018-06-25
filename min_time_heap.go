@@ -8,11 +8,12 @@ import (
 )
 
 type packet struct {
-	Timestamp   int64
-	CaptureInfo gopacket.CaptureInfo
-	Data        []byte
-	Reader      *pcapgo.Reader
-	InputFile   *os.File
+	Timestamp             int64
+	MinimumLegalTimestamp int64
+	CaptureInfo           gopacket.CaptureInfo
+	Data                  []byte
+	Reader                *pcapgo.Reader
+	InputFile             *os.File
 }
 
 type packetHeap []packet

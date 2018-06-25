@@ -103,7 +103,7 @@ func joincap(args []string) {
 			panic(fmt.Sprintln(inputFile.Name()+":", "Different LinkTypes:", linkType, reader.LinkType()))
 		}
 
-		nextPacket, err := readNext(reader, inputFile, cmdFlags.Verbose)
+		nextPacket, err := readNext(reader, inputFile, 0, cmdFlags.Verbose)
 		if err == nil {
 			heap.Push(&minTimeHeap, nextPacket)
 		}
@@ -126,7 +126,7 @@ func joincap(args []string) {
 		}
 		for {
 			// read the next packet from the source of the last written packet
-			nextPacket, err := readNext(earliestPacket.Reader, earliestPacket.InputFile, cmdFlags.Verbose)
+			nextPacket, err := readNext(earliestPacket.Reader, earliestPacket.InputFile, earliestPacket.MinimumLegalTimestamp, cmdFlags.Verbose)
 			if err == io.EOF {
 				break
 			}
@@ -144,7 +144,7 @@ func joincap(args []string) {
 	}
 }
 
-func readNext(reader *pcapgo.Reader, inputFile *os.File, verbose bool) (packet, error) {
+func readNext(reader *pcapgo.Reader, inputFile *os.File, minimumLegalTimestamp int64, verbose bool) (packet, error) {
 	for {
 		data, captureInfo, err := reader.ReadPacketData()
 		if err != nil {
@@ -162,6 +162,13 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, verbose bool) (packet, 
 			// skip errors
 			continue
 		}
+		if minimumLegalTimestamp > 0 && captureInfo.Timestamp.UnixNano() < minimumLegalTimestamp {
+			if verbose {
+				fmt.Fprintf(os.Stderr, "%s: illegal packet timestamp %v (skipping this packet)\n", inputFile.Name(), captureInfo.Timestamp)
+			}
+			// skip errors
+			continue
+		}
 		if len(data) == 0 {
 			if verbose {
 				fmt.Fprintf(os.Stderr, "%s: empty data (skipping this packet)\n", inputFile.Name())
@@ -170,12 +177,17 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, verbose bool) (packet, 
 			continue
 		}
 
+		if minimumLegalTimestamp == 0 {
+			minimumLegalTimestamp = captureInfo.Timestamp.UnixNano()
+		}
+
 		return packet{
-			Timestamp:   captureInfo.Timestamp.UnixNano(),
-			CaptureInfo: captureInfo,
-			Data:        data,
-			Reader:      reader,
-			InputFile:   inputFile}, nil
+			Timestamp:             captureInfo.Timestamp.UnixNano(),
+			MinimumLegalTimestamp: minimumLegalTimestamp,
+			CaptureInfo:           captureInfo,
+			Data:                  data,
+			Reader:                reader,
+			InputFile:             inputFile}, nil
 	}
 }
 
