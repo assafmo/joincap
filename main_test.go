@@ -362,3 +362,22 @@ func TestIgnoreTooSmallSnaplen(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+// TestIgnorePacketsWithTimeEarlierThanFirst packets with timestamp smaller than the
+// first packet should be ignored
+func TestIgnorePacketsWithTimeEarlierThanFirst(t *testing.T) {
+	outputFile, err := ioutil.TempFile("", "joincap_output_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFile.Close()
+	defer os.Remove(outputFile.Name())
+
+	joincap([]string{"joincap",
+		"-w", outputFile.Name(),
+		"pcap_examples/second_packet_time_is_too_small.pcap"})
+
+	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap)-1 {
+		t.FailNow()
+	}
+}
