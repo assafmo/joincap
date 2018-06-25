@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.8.4 (Jun 25, 2018)
+
+- use our own snaplen to avoid small snaplens by bad pcap writers
+
 ## v0.8.3 (Jun 12, 2018)
 
 - cmdFlags no longer global
