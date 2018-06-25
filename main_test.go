@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/google/gopacket/pcapgo"
+	"github.com/assafmo/gopacket/pcapgo"
 )
 
 const okPcap = "pcap_examples/ok.pcap"

@@ -10,12 +10,12 @@ import (
 	// _ "net/http/pprof"
 	"os"
 
+	"github.com/assafmo/gopacket/pcapgo"
 	"github.com/google/gopacket/layers"
-	"github.com/google/gopacket/pcapgo"
 	flags "github.com/jessevdk/go-flags"
 )
 
-const version = "0.8.3"
+const version = "0.8.4"
 
 func main() {
 	// go func() {
@@ -74,7 +74,7 @@ func joincap(args []string) {
 	writer := pcapgo.NewWriter(bufferedFileWriter)
 
 	var totalInputSizeBytes int64
-	var snaplen uint32 = 65536
+	var snaplen uint32 = 262144
 	var linkType layers.LinkType
 	for _, inputPcapPath := range cmdFlags.Rest.InFiles[1:] {
 		inputFile, err := os.Open(inputPcapPath)
@@ -96,7 +96,7 @@ func joincap(args []string) {
 		fStat, _ := inputFile.Stat()
 		totalInputSizeBytes += fStat.Size()
 
-		snaplen = max(snaplen, reader.Snaplen())
+		reader.SetSnaplen(snaplen)
 		if linkType == layers.LinkTypeNull {
 			linkType = reader.LinkType()
 		} else if linkType != reader.LinkType() {
