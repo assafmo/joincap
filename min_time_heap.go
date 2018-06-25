@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
-	"github.com/assafmo/gopacket/pcapgo"
 	"github.com/google/gopacket"
+	"github.com/google/gopacket/pcapgo"
 )
 
 type packet struct {

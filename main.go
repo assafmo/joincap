@@ -10,12 +10,13 @@ import (
 	// _ "net/http/pprof"
 	"os"
 
-	"github.com/assafmo/gopacket/pcapgo"
 	"github.com/google/gopacket/layers"
+	"github.com/google/gopacket/pcapgo"
 	flags "github.com/jessevdk/go-flags"
 )
 
 const version = "0.8.5"
+const maxSnaplen = 262144
 
 func main() {
 	// go func() {
@@ -74,7 +75,6 @@ func joincap(args []string) {
 	writer := pcapgo.NewWriter(bufferedFileWriter)
 
 	var totalInputSizeBytes int64
-	var snaplen uint32 = 262144
 	var linkType layers.LinkType
 	for _, inputPcapPath := range cmdFlags.Rest.InFiles[1:] {
 		inputFile, err := os.Open(inputPcapPath)
@@ -96,7 +96,7 @@ func joincap(args []string) {
 		fStat, _ := inputFile.Stat()
 		totalInputSizeBytes += fStat.Size()
 
-		reader.SetSnaplen(snaplen)
+		reader.SetSnaplen(maxSnaplen)
 		if linkType == layers.LinkTypeNull {
 			linkType = reader.LinkType()
 		} else if linkType != reader.LinkType() {
@@ -114,7 +114,7 @@ func joincap(args []string) {
 		fmt.Fprintf(os.Stderr, "writing to %s\n", outputFile.Name())
 	}
 
-	writer.WriteFileHeader(snaplen, linkType)
+	writer.WriteFileHeader(maxSnaplen, linkType)
 	for minTimeHeap.Len() > 0 {
 		// find the earliest packet and write it to the output file
 		earliestPacket := heap.Pop(&minTimeHeap).(packet)
