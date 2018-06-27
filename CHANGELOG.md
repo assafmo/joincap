@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.8.6 (Jun 27, 2018)
+
+- use the golang logger (logs with datetime)
+
 ## v0.8.5 (Jun 25, 2018)
 
 - per input file, set minimum legal timestamp as the first packet's time
