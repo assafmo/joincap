@@ -22,10 +22,13 @@ func main() {
 	// go func() {
 	// 	log.Println(http.ListenAndServe("localhost:8080", nil))
 	// }()
-	joincap(os.Args)
+	err := joincap(os.Args)
+	if err != nil {
+		log.Fatalln(err)
+	}
 }
 
-func joincap(args []string) {
+func joincap(args []string) error {
 	log.SetOutput(os.Stderr)
 
 	var cmdFlags struct {
@@ -41,18 +44,17 @@ func joincap(args []string) {
 
 	if err != nil {
 		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
-			// -h flag, print version and help and exit
+			// if -h flag, print version and help and exit
 			fmt.Printf("joincap v%s\n", version)
-			os.Exit(0)
-		} else {
-			log.Fatalln(err)
+			return nil
 		}
+		return err
 	}
 
+	// if -V flag, print version and exit
 	if cmdFlags.Version {
-		// -v flag, print version and exit
 		fmt.Printf("joincap v%s\n", version)
-		os.Exit(0)
+		return nil
 	}
 
 	if cmdFlags.Verbose {
@@ -66,7 +68,7 @@ func joincap(args []string) {
 	if cmdFlags.OutputFilePath != "-" {
 		outputFile, err = os.Create(cmdFlags.OutputFilePath)
 		if err != nil {
-			log.Fatalf("Cannot open %s for writing: %v\n", cmdFlags.OutputFilePath, err)
+			return fmt.Errorf("cannot open %s for writing: %v", cmdFlags.OutputFilePath, err)
 		}
 		defer outputFile.Close()
 	}
@@ -101,7 +103,7 @@ func joincap(args []string) {
 		if linkType == layers.LinkTypeNull {
 			linkType = reader.LinkType()
 		} else if linkType != reader.LinkType() {
-			log.Fatalf("%s: Different LinkTypes: %v %v\n", inputFile.Name(), linkType, reader.LinkType())
+			return fmt.Errorf("%s: Different LinkTypes: %v %v", inputFile.Name(), linkType, reader.LinkType())
 		}
 
 		nextPacket, err := readNext(reader, inputFile, 0, cmdFlags.Verbose)
@@ -143,6 +145,7 @@ func joincap(args []string) {
 			break
 		}
 	}
+	return nil
 }
 
 func readNext(reader *pcapgo.Reader, inputFile *os.File, minimumLegalTimestamp int64, verbose bool) (packet, error) {
@@ -194,8 +197,7 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, minimumLegalTimestamp i
 
 func write(writer *pcapgo.Writer, packetToWrite packet, verbose bool) {
 	err := writer.WritePacket(packetToWrite.CaptureInfo, packetToWrite.Data)
-	if err != nil && verbose {
+	if err != nil && verbose { // skip errors
 		log.Printf("write error: %v (skipping this packet)\n", err)
-		// skip errors
 	}
 }

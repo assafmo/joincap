@@ -4,7 +4,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"strings"
 	"testing"
 
@@ -393,17 +392,27 @@ func TestIgnorePacketsWithTimeEarlierThanFirst(t *testing.T) {
 
 // TestPrintVersion tests that the version is printed okay
 func TestPrintVersion(t *testing.T) {
-	if os.Getenv("BE_CRASHER") == "1" {
-		joincap([]string{"joincap", "-V"})
-		return
-	}
-	cmd := exec.Command(os.Args[0], "-test.run=TestPrintVersion")
-	cmd.Env = append(os.Environ(), "BE_CRASHER=1")
-	outBytes, err := cmd.Output()
+	savedStdout := os.Stdout
+	defer func() { os.Stdout = savedStdout }()
+
+	outputFile, err := ioutil.TempFile("", "joincap_output_")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if strings.Trim(string(outBytes), " \t\n\r") != "joincap v"+version {
-		t.FailNow()
+	filename := outputFile.Name()
+	defer os.Remove(filename)
+
+	os.Stdout = outputFile
+	joincap([]string{"joincap", "-V"})
+	outputFile.Close()
+
+	stdoutBytes, err := ioutil.ReadFile(filename)
+	if err != nil {
+		t.Fatal(err)
 	}
+
+	if strings.TrimSpace(string(stdoutBytes)) != "joincap v"+version {
+		t.Fatal(strings.TrimSpace(string(stdoutBytes)), "joincap v"+version)
+	}
+
 }
