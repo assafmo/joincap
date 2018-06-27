@@ -25,3 +25,8 @@ jobs:
       - run: go version
       - run: go get -v -t -d ./...
       - run: go test -v ./...
+
+      # coverage
+      - run: go get github.com/mattn/goveralls
+      - run: go test -v -cover -race -coverprofile=/home/ubuntu/coverage.out
+      - run: $GOPATH/bin/goveralls -coverprofile=/home/ubuntu/coverage.out -service=circle-ci -repotoken=$COVERALLS_TOKEN
