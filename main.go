@@ -5,7 +5,7 @@ import (
 	"container/heap"
 	"fmt"
 	"io"
-	// "log"
+	"log"
 	// "net/http"
 	// _ "net/http/pprof"
 	"os"
@@ -15,7 +15,7 @@ import (
 	flags "github.com/jessevdk/go-flags"
 )
 
-const version = "0.8.5"
+const version = "0.8.6"
 const maxSnaplen = 262144
 
 func main() {
@@ -44,7 +44,7 @@ func joincap(args []string) {
 			fmt.Printf("joincap v%s\n", version)
 			os.Exit(0)
 		} else {
-			panic(err)
+			log.Fatalln(err)
 		}
 	}
 
@@ -53,8 +53,10 @@ func joincap(args []string) {
 		fmt.Printf("joincap v%s\n", version)
 		os.Exit(0)
 	}
+
+	log.SetOutput(os.Stderr)
 	if cmdFlags.Verbose {
-		fmt.Fprintf(os.Stderr, "joincap v%s\n", version)
+		log.Printf("joincap v%s\n", version)
 	}
 
 	minTimeHeap := packetHeap{}
@@ -64,8 +66,7 @@ func joincap(args []string) {
 	if cmdFlags.OutputFilePath != "-" {
 		outputFile, err = os.Create(cmdFlags.OutputFilePath)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s: %v\n", cmdFlags.OutputFilePath, err)
-			panic(err)
+			log.Fatalf("Cannot open %s for writing: %v\n", cmdFlags.OutputFilePath, err)
 		}
 		defer outputFile.Close()
 	}
@@ -80,7 +81,7 @@ func joincap(args []string) {
 		inputFile, err := os.Open(inputPcapPath)
 		if err != nil {
 			if cmdFlags.Verbose {
-				fmt.Fprintf(os.Stderr, "%s: %v (skipping this file)\n", inputPcapPath, err)
+				log.Printf("%s: %v (skipping this file)\n", inputPcapPath, err)
 			}
 			continue
 		}
@@ -88,7 +89,7 @@ func joincap(args []string) {
 		reader, err := pcapgo.NewReader(inputFile)
 		if err != nil {
 			if cmdFlags.Verbose {
-				fmt.Fprintf(os.Stderr, "%s: %v (skipping this file)\n", inputFile.Name(), err)
+				log.Printf("%s: %v (skipping this file)\n", inputFile.Name(), err)
 			}
 			continue
 		}
@@ -100,7 +101,7 @@ func joincap(args []string) {
 		if linkType == layers.LinkTypeNull {
 			linkType = reader.LinkType()
 		} else if linkType != reader.LinkType() {
-			panic(fmt.Sprintln(inputFile.Name()+":", "Different LinkTypes:", linkType, reader.LinkType()))
+			log.Fatalf("%s: Different LinkTypes: %v %v\n", inputFile.Name(), linkType, reader.LinkType())
 		}
 
 		nextPacket, err := readNext(reader, inputFile, 0, cmdFlags.Verbose)
@@ -110,8 +111,8 @@ func joincap(args []string) {
 	}
 
 	if cmdFlags.Verbose {
-		fmt.Fprintf(os.Stderr, "merging %d input files of size %f GiB\n", minTimeHeap.Len(), float64(totalInputSizeBytes)/1024/1024/1024)
-		fmt.Fprintf(os.Stderr, "writing to %s\n", outputFile.Name())
+		log.Printf("merging %d input files of size %f GiB\n", minTimeHeap.Len(), float64(totalInputSizeBytes)/1024/1024/1024)
+		log.Printf("writing to %s\n", outputFile.Name())
 	}
 
 	writer.WriteFileHeader(maxSnaplen, linkType)
@@ -150,28 +151,28 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, minimumLegalTimestamp i
 		if err != nil {
 			if err == io.EOF {
 				if verbose {
-					fmt.Fprintf(os.Stderr, "%s: done\n", inputFile.Name())
+					log.Printf("%s: done\n", inputFile.Name())
 				}
 				inputFile.Close()
 
 				return packet{}, err
 			}
 			if verbose {
-				fmt.Fprintf(os.Stderr, "%s: %v (skipping this packet)\n", inputFile.Name(), err)
+				log.Printf("%s: %v (skipping this packet)\n", inputFile.Name(), err)
 			}
 			// skip errors
 			continue
 		}
 		if minimumLegalTimestamp > 0 && captureInfo.Timestamp.UnixNano() < minimumLegalTimestamp {
 			if verbose {
-				fmt.Fprintf(os.Stderr, "%s: illegal packet timestamp %v (skipping this packet)\n", inputFile.Name(), captureInfo.Timestamp)
+				log.Printf("%s: illegal packet timestamp %v (skipping this packet)\n", inputFile.Name(), captureInfo.Timestamp)
 			}
 			// skip errors
 			continue
 		}
 		if len(data) == 0 {
 			if verbose {
-				fmt.Fprintf(os.Stderr, "%s: empty data (skipping this packet)\n", inputFile.Name())
+				log.Printf("%s: empty data (skipping this packet)\n", inputFile.Name())
 			}
 			// skip errors
 			continue
@@ -194,7 +195,7 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, minimumLegalTimestamp i
 func write(writer *pcapgo.Writer, packetToWrite packet, verbose bool) {
 	err := writer.WritePacket(packetToWrite.CaptureInfo, packetToWrite.Data)
 	if err != nil && verbose {
-		fmt.Fprintf(os.Stderr, "write error: %v (skipping this packet)\n", err)
+		log.Printf("write error: %v (skipping this packet)\n", err)
 		// skip errors
 	}
 }
