@@ -22,11 +22,12 @@ func main() {
 	// go func() {
 	// 	log.Println(http.ListenAndServe("localhost:8080", nil))
 	// }()
-
 	joincap(os.Args)
 }
 
 func joincap(args []string) {
+	log.SetOutput(os.Stderr)
+
 	var cmdFlags struct {
 		Verbose        bool   `short:"v" long:"verbose" description:"Explain when skipping packets or entire input files."`
 		Version        bool   `short:"V" long:"version" description:"Print the version and exit."`
@@ -40,7 +41,7 @@ func joincap(args []string) {
 
 	if err != nil {
 		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
-			// -h flasg, print version and help and exit
+			// -h flag, print version and help and exit
 			fmt.Printf("joincap v%s\n", version)
 			os.Exit(0)
 		} else {
@@ -54,7 +55,6 @@ func joincap(args []string) {
 		os.Exit(0)
 	}
 
-	log.SetOutput(os.Stderr)
 	if cmdFlags.Verbose {
 		log.Printf("joincap v%s\n", version)
 	}
@@ -198,11 +198,4 @@ func write(writer *pcapgo.Writer, packetToWrite packet, verbose bool) {
 		log.Printf("write error: %v (skipping this packet)\n", err)
 		// skip errors
 	}
-}
-
-func max(x, y uint32) uint32 {
-	if x > y {
-		return x
-	}
-	return y
 }

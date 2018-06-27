@@ -9,6 +9,11 @@ import (
 	"github.com/google/gopacket/pcapgo"
 )
 
+func TestMain(m *testing.M) {
+	os.Stderr = os.Stdin // so joincap -v won't pollute the output
+	os.Exit(m.Run())
+}
+
 const okPcap = "pcap_examples/ok.pcap"
 
 func packetCount(t *testing.T, pcapPath string) uint64 {
@@ -118,7 +123,7 @@ func TestCount(t *testing.T) {
 	defer os.Remove(outputFile.Name())
 
 	joincap([]string{"joincap",
-		"-w", outputFile.Name(),
+		"-v", "-w", outputFile.Name(),
 		okPcap, okPcap})
 
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap)*2 {
@@ -137,7 +142,7 @@ func TestOrder(t *testing.T) {
 	defer os.Remove(outputFile.Name())
 
 	joincap([]string{"joincap",
-		"-w", outputFile.Name(),
+		"-v", "-w", outputFile.Name(),
 		okPcap, okPcap})
 
 	testIsOrdered(t, okPcap)
@@ -155,7 +160,7 @@ func TestIgnoreInputFileCorruptGlobalHeader(t *testing.T) {
 	defer os.Remove(outputFile.Name())
 
 	joincap([]string{"joincap",
-		"-w", outputFile.Name(),
+		"-v", "-w", outputFile.Name(),
 		"pcap_examples/bad_global.pcap"})
 
 	if packetCount(t, outputFile.Name()) != 0 {
@@ -173,7 +178,7 @@ func TestIgnorePacketWithCorruptHeader(t *testing.T) {
 	defer os.Remove(outputFile.Name())
 
 	joincap([]string{"joincap",
-		"-w", outputFile.Name(),
+		"-v", "-w", outputFile.Name(),
 		okPcap, "pcap_examples/bad_first_header.pcap"})
 
 	testIsOrdered(t, outputFile.Name())
@@ -194,7 +199,7 @@ func TestIgnoreTruncatedPacketEOF(t *testing.T) {
 	defer os.Remove(outputFile.Name())
 
 	joincap([]string{"joincap",
-		"-w", outputFile.Name(),
+		"-v", "-w", outputFile.Name(),
 		"pcap_examples/unexpected_eof_on_second_packet.pcap"})
 
 	testIsOrdered(t, outputFile.Name())
@@ -214,7 +219,7 @@ func TestIgnoreEmptyPcap(t *testing.T) {
 	defer os.Remove(outputFile.Name())
 
 	joincap([]string{"joincap",
-		"-w", outputFile.Name(),
+		"-v", "-w", outputFile.Name(),
 		okPcap, "pcap_examples/no_packets.pcap"})
 
 	testIsOrdered(t, outputFile.Name())
@@ -234,7 +239,7 @@ func TestIgnoreInputFileTruncatedGlobalHeader(t *testing.T) {
 	defer os.Remove(outputFile.Name())
 
 	joincap([]string{"joincap",
-		"-w", outputFile.Name(),
+		"-v", "-w", outputFile.Name(),
 		okPcap, "pcap_examples/partial_global_header.pcap"})
 
 	testIsOrdered(t, outputFile.Name())
@@ -254,7 +259,7 @@ func TestIgnoreInputFileTruncatedFirstPacketHeader(t *testing.T) {
 	defer os.Remove(outputFile.Name())
 
 	joincap([]string{"joincap",
-		"-w", outputFile.Name(),
+		"-v", "-w", outputFile.Name(),
 		"pcap_examples/partial_first_header.pcap", okPcap})
 
 	testIsOrdered(t, outputFile.Name())
@@ -274,7 +279,7 @@ func TestIgnoreInputFileDoesNotExists(t *testing.T) {
 	defer os.Remove(outputFile.Name())
 
 	joincap([]string{"joincap",
-		"-w", outputFile.Name(),
+		"-v", "-w", outputFile.Name(),
 		"/nothing/here", okPcap, "or_here"})
 
 	testIsOrdered(t, outputFile.Name())
@@ -294,7 +299,7 @@ func TestIgnoreInputFileIsDirectory(t *testing.T) {
 	defer os.Remove(outputFile.Name())
 
 	joincap([]string{"joincap",
-		"-w", outputFile.Name(),
+		"-v", "-w", outputFile.Name(),
 		"pcap_examples", okPcap})
 
 	testIsOrdered(t, outputFile.Name())
@@ -314,7 +319,7 @@ func TestIgnoreGarbageEndingOfPcap(t *testing.T) {
 	defer os.Remove(outputFile.Name())
 
 	joincap([]string{"joincap",
-		"-w", outputFile.Name(),
+		"-v", "-w", outputFile.Name(),
 		"pcap_examples/bad_end.pcap", okPcap})
 
 	testIsOrdered(t, outputFile.Name())
@@ -335,7 +340,7 @@ func TestGzippedPcap(t *testing.T) {
 	defer os.Remove(outputFile.Name())
 
 	joincap([]string{"joincap",
-		"-w", outputFile.Name(),
+		"-v", "-w", outputFile.Name(),
 		"pcap_examples/ok.pcap.gz", okPcap})
 
 	testIsOrdered(t, outputFile.Name())
@@ -355,7 +360,7 @@ func TestIgnoreTooSmallSnaplen(t *testing.T) {
 	defer os.Remove(outputFile.Name())
 
 	joincap([]string{"joincap",
-		"-w", outputFile.Name(),
+		"-v", "-w", outputFile.Name(),
 		"pcap_examples/very_small_snaplen.pcap"})
 
 	// snaplen is edited to be way to small
@@ -375,7 +380,7 @@ func TestIgnorePacketsWithTimeEarlierThanFirst(t *testing.T) {
 	defer os.Remove(outputFile.Name())
 
 	joincap([]string{"joincap",
-		"-w", outputFile.Name(),
+		"-v", "-w", outputFile.Name(),
 		"pcap_examples/second_packet_time_is_too_small.pcap"})
 
 	// the second packet is edited to have 1970 date...
