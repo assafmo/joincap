@@ -4,6 +4,8 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"os/exec"
+	"strings"
 	"testing"
 
 	"github.com/google/gopacket/pcapgo"
@@ -385,6 +387,23 @@ func TestIgnorePacketsWithTimeEarlierThanFirst(t *testing.T) {
 
 	// the second packet is edited to have 1970 date...
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap)-1 {
+		t.FailNow()
+	}
+}
+
+// TestPrintVersion tests that the version is printed okay
+func TestPrintVersion(t *testing.T) {
+	if os.Getenv("BE_CRASHER") == "1" {
+		joincap([]string{"joincap", "-V"})
+		return
+	}
+	cmd := exec.Command(os.Args[0], "-test.run=TestPrintVersion")
+	cmd.Env = append(os.Environ(), "BE_CRASHER=1")
+	outBytes, err := cmd.Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Trim(string(outBytes), " \t\n\r") != "joincap v"+version {
 		t.FailNow()
 	}
 }
