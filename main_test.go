@@ -443,3 +443,15 @@ func TestPrintHelp(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+// TestExitOnUnknownFlag tests exit on unknown cli flag
+func TestExitOnUnknownFlag(t *testing.T) {
+	err := joincap([]string{"joincap", "--banana"})
+	if err == nil {
+		t.Fatal("Shouldn't exited without an error")
+	}
+	if !strings.Contains(err.Error(), "unknown flag") ||
+		!strings.Contains(err.Error(), "banana") {
+		t.FailNow()
+	}
+}
