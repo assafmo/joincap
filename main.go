@@ -44,8 +44,7 @@ func joincap(args []string) error {
 
 	if err != nil {
 		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
-			// if -h flag, print version and help and exit
-			fmt.Printf("joincap v%s\n", version)
+			// if -h flag, help is printed by the library on exit
 			return nil
 		}
 		return err

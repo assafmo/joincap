@@ -395,16 +395,16 @@ func TestPrintVersion(t *testing.T) {
 	savedStdout := os.Stdout
 	defer func() { os.Stdout = savedStdout }()
 
-	outputFile, err := ioutil.TempFile("", "joincap_output_")
+	stdoutTmpFile, err := ioutil.TempFile("", "joincap_output_")
 	if err != nil {
 		t.Fatal(err)
 	}
-	filename := outputFile.Name()
+	filename := stdoutTmpFile.Name()
 	defer os.Remove(filename)
 
-	os.Stdout = outputFile
+	os.Stdout = stdoutTmpFile
 	joincap([]string{"joincap", "-V"})
-	outputFile.Close()
+	stdoutTmpFile.Close()
 
 	stdoutBytes, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -414,5 +414,32 @@ func TestPrintVersion(t *testing.T) {
 	if strings.TrimSpace(string(stdoutBytes)) != "joincap v"+version {
 		t.Fatal(strings.TrimSpace(string(stdoutBytes)), "joincap v"+version)
 	}
+}
 
+// TestPrintHelp tests that the help is printed okay
+func TestPrintHelp(t *testing.T) {
+	savedStdout := os.Stdout
+	defer func() { os.Stdout = savedStdout }()
+
+	stdoutTmpFile, err := ioutil.TempFile("", "joincap_output_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	filename := stdoutTmpFile.Name()
+	defer os.Remove(filename)
+
+	os.Stdout = stdoutTmpFile
+	joincap([]string{"joincap", "-h"})
+	stdoutTmpFile.Close()
+
+	stdoutBytes, err := ioutil.ReadFile(filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	help := strings.TrimSpace(string(stdoutBytes))
+
+	if !strings.HasPrefix(help, "Usage:") {
+		t.FailNow()
+	}
 }
