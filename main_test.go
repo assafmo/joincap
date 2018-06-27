@@ -466,3 +466,24 @@ func TestWriteToNonExistingDirectory(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+// TestExitOnDifferentLinkTypes test cannot merge different linktypes
+func TestExitOnDifferentLinkTypes(t *testing.T) {
+	outputFile, err := ioutil.TempFile("", "joincap_output_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFile.Close()
+	defer os.Remove(outputFile.Name())
+
+	err = joincap([]string{"joincap",
+		"-v", "-w", outputFile.Name(),
+		"pcap_examples/ok.pcap", "pcap_examples/linktype_unknown.pcap"})
+
+	if err == nil {
+		t.Fatal("Shouldn't exited without an error")
+	}
+	if !strings.Contains(err.Error(), "Different LinkTypes") {
+		t.FailNow()
+	}
+}
