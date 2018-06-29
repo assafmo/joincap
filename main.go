@@ -13,9 +13,10 @@ import (
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcapgo"
 	flags "github.com/jessevdk/go-flags"
+	"github.com/pkg/errors"
 )
 
-const version = "0.8.6"
+const version = "0.8.7"
 const maxSnaplen = 262144
 
 func main() {
@@ -47,7 +48,7 @@ func joincap(args []string) error {
 			// if -h flag, help is printed by the library on exit
 			return nil
 		}
-		return err
+		return errors.Wrap(err, "cmd flags error")
 	}
 
 	// if -V flag, print version and exit
@@ -67,7 +68,7 @@ func joincap(args []string) error {
 	if cmdFlags.OutputFilePath != "-" {
 		outputFile, err = os.Create(cmdFlags.OutputFilePath)
 		if err != nil {
-			return fmt.Errorf("cannot open %s for writing: %v", cmdFlags.OutputFilePath, err)
+			return errors.Wrap(err, fmt.Sprintf("cannot open %s for writing", cmdFlags.OutputFilePath))
 		}
 		defer outputFile.Close()
 	}
@@ -102,17 +103,24 @@ func joincap(args []string) error {
 		if linkType == layers.LinkTypeNull {
 			linkType = reader.LinkType()
 		} else if linkType != reader.LinkType() {
-			return fmt.Errorf("%s: Different LinkTypes: %v %v", inputFile.Name(), linkType, reader.LinkType())
+			return fmt.Errorf("%s: different linktypes: %v %v",
+				inputFile.Name(),
+				linkType,
+				reader.LinkType())
 		}
 
 		nextPacket, err := readNext(reader, inputFile, 0, cmdFlags.Verbose)
 		if err == nil {
 			heap.Push(&minTimeHeap, nextPacket)
+		} else {
+			log.Printf("%s: %v before first packet (skipping this file)\n", inputFile.Name(), err)
 		}
 	}
 
 	if cmdFlags.Verbose {
-		log.Printf("merging %d input files of size %f GiB\n", minTimeHeap.Len(), float64(totalInputSizeBytes)/1024/1024/1024)
+		log.Printf("merging %d input files of size %f GiB\n",
+			minTimeHeap.Len(),
+			float64(totalInputSizeBytes)/1024/1024/1024)
 		log.Printf("writing to %s\n", outputFile.Name())
 	}
 
@@ -128,7 +136,11 @@ func joincap(args []string) error {
 		}
 		for {
 			// read the next packet from the source of the last written packet
-			nextPacket, err := readNext(earliestPacket.Reader, earliestPacket.InputFile, earliestPacket.MinimumLegalTimestamp, cmdFlags.Verbose)
+			nextPacket, err := readNext(
+				earliestPacket.Reader,
+				earliestPacket.InputFile,
+				earliestPacket.MinimumLegalTimestamp,
+				cmdFlags.Verbose)
 			if err == io.EOF {
 				break
 			}
@@ -153,11 +165,11 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, minimumLegalTimestamp i
 		if err != nil {
 			if err == io.EOF {
 				if verbose {
-					log.Printf("%s: done\n", inputFile.Name())
+					log.Printf("%s: done (closing)\n", inputFile.Name())
 				}
 				inputFile.Close()
 
-				return packet{}, err
+				return packet{}, io.EOF
 			}
 			if verbose {
 				log.Printf("%s: %v (skipping this packet)\n", inputFile.Name(), err)
@@ -165,7 +177,8 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, minimumLegalTimestamp i
 			// skip errors
 			continue
 		}
-		if minimumLegalTimestamp > 0 && captureInfo.Timestamp.UnixNano() < minimumLegalTimestamp {
+		if minimumLegalTimestamp > 0 &&
+			captureInfo.Timestamp.UnixNano() < minimumLegalTimestamp {
 			if verbose {
 				log.Printf("%s: illegal packet timestamp %v (skipping this packet)\n", inputFile.Name(), captureInfo.Timestamp)
 			}
@@ -190,7 +203,8 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, minimumLegalTimestamp i
 			CaptureInfo:           captureInfo,
 			Data:                  data,
 			Reader:                reader,
-			InputFile:             inputFile}, nil
+			InputFile:             inputFile,
+		}, nil
 	}
 }
 
