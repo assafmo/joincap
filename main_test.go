@@ -483,7 +483,7 @@ func TestExitOnDifferentLinkTypes(t *testing.T) {
 	if err == nil {
 		t.Fatal("Shouldn't exited without an error")
 	}
-	if !strings.Contains(err.Error(), "Different LinkTypes") {
+	if !strings.Contains(err.Error(), "different linktypes") {
 		t.FailNow()
 	}
 }
