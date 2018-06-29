@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.8.7 (Jun 29, 2018)
+
+- better error handling
+- more test coverage
+
 ## v0.8.6 (Jun 27, 2018)
 
 - use the golang logger (logs with datetime)
