@@ -59,6 +59,10 @@ func joincap(args []string) error {
 
 	minTimeHeap := minheap.PacketHeap{}
 	heap.Init(&minTimeHeap)
+	linkType, err := initHeapWithInputFiles(cmdFlags.Rest.InFiles[1:], &minTimeHeap, cmdFlags.Verbose)
+	if err != nil {
+		return err
+	}
 
 	outputFile := os.Stdout
 	if cmdFlags.OutputFilePath != "-" {
@@ -71,55 +75,11 @@ func joincap(args []string) error {
 	bufferedFileWriter := bufio.NewWriter(outputFile)
 	defer bufferedFileWriter.Flush()
 
-	writer := pcapgo.NewWriter(bufferedFileWriter)
-
-	var totalInputSizeBytes int64
-	var linkType layers.LinkType
-	for _, inputPcapPath := range cmdFlags.Rest.InFiles[1:] {
-		inputFile, err := os.Open(inputPcapPath)
-		if err != nil {
-			if cmdFlags.Verbose {
-				log.Printf("%s: %v (skipping this file)\n", inputPcapPath, err)
-			}
-			continue
-		}
-
-		reader, err := pcapgo.NewReader(inputFile)
-		if err != nil {
-			if cmdFlags.Verbose {
-				log.Printf("%s: %v (skipping this file)\n", inputFile.Name(), err)
-			}
-			continue
-		}
-
-		fStat, _ := inputFile.Stat()
-		totalInputSizeBytes += fStat.Size()
-
-		reader.SetSnaplen(maxSnaplen)
-		if linkType == layers.LinkTypeNull {
-			linkType = reader.LinkType()
-		} else if linkType != reader.LinkType() {
-			return fmt.Errorf("%s: different linktypes: %v %v",
-				inputFile.Name(),
-				linkType,
-				reader.LinkType())
-		}
-
-		nextPacket, err := readNext(reader, inputFile, 0, cmdFlags.Verbose)
-		if err == nil {
-			heap.Push(&minTimeHeap, nextPacket)
-		} else {
-			log.Printf("%s: %v before first packet (skipping this file)\n", inputFile.Name(), err)
-		}
-	}
-
 	if cmdFlags.Verbose {
-		log.Printf("merging %d input files of size %f GiB\n",
-			minTimeHeap.Len(),
-			float64(totalInputSizeBytes)/1024/1024/1024)
 		log.Printf("writing to %s\n", outputFile.Name())
 	}
 
+	writer := pcapgo.NewWriter(bufferedFileWriter)
 	writer.WriteFileHeader(maxSnaplen, linkType)
 	for minTimeHeap.Len() > 0 {
 		// find the earliest packet and write it to the output file
@@ -153,6 +113,59 @@ func joincap(args []string) error {
 		}
 	}
 	return nil
+}
+
+func initHeapWithInputFiles(inputFilePaths []string, minTimeHeap *minheap.PacketHeap, verbose bool) (layers.LinkType, error) {
+	var totalInputSizeBytes int64
+	var linkType layers.LinkType
+	for _, inputPcapPath := range inputFilePaths {
+		inputFile, err := os.Open(inputPcapPath)
+		if err != nil {
+			if verbose {
+				log.Printf("%s: %v (skipping this file)\n", inputPcapPath, err)
+			}
+			continue
+		}
+
+		reader, err := pcapgo.NewReader(inputFile)
+		if err != nil {
+			if verbose {
+				log.Printf("%s: %v (skipping this file)\n", inputFile.Name(), err)
+			}
+			continue
+		}
+
+		fStat, _ := inputFile.Stat()
+		totalInputSizeBytes += fStat.Size()
+
+		reader.SetSnaplen(maxSnaplen)
+		if linkType == layers.LinkTypeNull {
+			linkType = reader.LinkType()
+		} else if linkType != reader.LinkType() {
+			return layers.LinkTypeNull,
+				fmt.Errorf(
+					"%s: different linktypes: %v %v",
+					inputFile.Name(),
+					linkType,
+					reader.LinkType(),
+				)
+		}
+
+		nextPacket, err := readNext(reader, inputFile, 0, verbose)
+		if err == nil {
+			heap.Push(minTimeHeap, nextPacket)
+		} else {
+			log.Printf("%s: %v before first packet (skipping this file)\n", inputFile.Name(), err)
+		}
+	}
+
+	if verbose {
+		log.Printf("merging %d input files of size %f GiB\n",
+			minTimeHeap.Len(),
+			float64(totalInputSizeBytes)/1024/1024/1024)
+	}
+
+	return linkType, nil
 }
 
 func readNext(reader *pcapgo.Reader, inputFile *os.File, minimumLegalTimestamp int64, verbose bool) (minheap.Packet, error) {
