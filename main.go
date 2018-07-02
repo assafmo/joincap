@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	// "net/http"
-	// _ "net/http/pprof"
 	"os"
 
 	"github.com/google/gopacket/layers"
@@ -20,12 +18,9 @@ const version = "0.8.7"
 const maxSnaplen = 262144
 
 func main() {
-	// go func() {
-	// 	log.Println(http.ListenAndServe("localhost:8080", nil))
-	// }()
 	err := joincap(os.Args)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
 }
 
