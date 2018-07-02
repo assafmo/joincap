@@ -36,12 +36,12 @@ go get -u github.com/assafmo/joincap
 
 ```bash
 Usage:
-  joincap [OPTIONS] InFiles...
+  main [OPTIONS] InFiles...
 
 Application Options:
-  -v, --verbose  Explain when skipping packets or entire input files.
-  -V, --version  Print the version and exit.
-  -w=            Sets the output filename. If the name is '-', stdout will be used. (default: -)
+  -v, --verbose  Explain when skipping packets or entire input files
+  -V, --version  Print the version and exit
+  -w=            Sets the output filename. If the name is '-', stdout will be used (default: -)
 
 Help Options:
   -h, --help     Show this help message

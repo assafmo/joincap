@@ -28,9 +28,9 @@ func joincap(args []string) error {
 	log.SetOutput(os.Stderr)
 
 	var cmdFlags struct {
-		Verbose        bool   `short:"v" long:"verbose" description:"Explain when skipping packets or entire input files."`
-		Version        bool   `short:"V" long:"version" description:"Print the version and exit."`
-		OutputFilePath string `short:"w" default:"-" description:"Sets the output filename. If the name is '-', stdout will be used."`
+		Verbose        bool   `short:"v" long:"verbose" description:"Explain when skipping packets or input files"`
+		Version        bool   `short:"V" long:"version" description:"Print the version and exit"`
+		OutputFilePath string `short:"w" default:"-" description:"Sets the output filename. If the name is '-', stdout will be used"`
 		Rest           struct {
 			InFiles []string
 		} `positional-args:"yes" required:"yes"`
