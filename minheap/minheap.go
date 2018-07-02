@@ -7,7 +7,7 @@ import (
 	"github.com/google/gopacket/pcapgo"
 )
 
-// Packet is used by PacketHeap to order packets
+// Packet is used by PacketHeap to order packets by timestamp
 // and by joincap to merge pcaps
 type Packet struct {
 	Timestamp             int64
