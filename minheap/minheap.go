@@ -1,4 +1,4 @@
-package main
+package minheap
 
 import (
 	"os"
@@ -7,7 +7,9 @@ import (
 	"github.com/google/gopacket/pcapgo"
 )
 
-type packet struct {
+// Packet is used by PacketHeap to order packets
+// and by joincap to merge pcaps
+type Packet struct {
 	Timestamp             int64
 	MinimumLegalTimestamp int64
 	CaptureInfo           gopacket.CaptureInfo
@@ -16,23 +18,24 @@ type packet struct {
 	InputFile             *os.File
 }
 
-type packetHeap []packet
+// PacketHeap is a minimum heap of packets ordered by timestamp
+type PacketHeap []Packet
 
-func (h packetHeap) Len() int { return len(h) }
-func (h packetHeap) Less(i, j int) bool {
+func (h PacketHeap) Len() int { return len(h) }
+func (h PacketHeap) Less(i, j int) bool {
 	return h[i].Timestamp <= h[j].Timestamp
 }
-func (h packetHeap) Swap(i, j int) { h[i], h[j] = h[j], h[i] }
+func (h PacketHeap) Swap(i, j int) { h[i], h[j] = h[j], h[i] }
 
 // Push use pointer receivers because they modify the slice's length,
 // not just its contents.
-func (h *packetHeap) Push(x interface{}) {
-	*h = append(*h, x.(packet))
+func (h *PacketHeap) Push(x interface{}) {
+	*h = append(*h, x.(Packet))
 }
 
 // Pop use pointer receivers because they modify the slice's length,
 // not just its contents.
-func (h *packetHeap) Pop() interface{} {
+func (h *PacketHeap) Pop() interface{} {
 	old := *h
 	n := len(old)
 	x := old[n-1]

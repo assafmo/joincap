@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/assafmo/joincap/minheap"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcapgo"
 	flags "github.com/jessevdk/go-flags"
@@ -56,7 +57,7 @@ func joincap(args []string) error {
 		log.Printf("joincap v%s\n", version)
 	}
 
-	minTimeHeap := packetHeap{}
+	minTimeHeap := minheap.PacketHeap{}
 	heap.Init(&minTimeHeap)
 
 	outputFile := os.Stdout
@@ -122,7 +123,7 @@ func joincap(args []string) error {
 	writer.WriteFileHeader(maxSnaplen, linkType)
 	for minTimeHeap.Len() > 0 {
 		// find the earliest packet and write it to the output file
-		earliestPacket := heap.Pop(&minTimeHeap).(packet)
+		earliestPacket := heap.Pop(&minTimeHeap).(minheap.Packet)
 		write(writer, earliestPacket, cmdFlags.Verbose)
 
 		var earliestHeapTime int64
@@ -154,7 +155,7 @@ func joincap(args []string) error {
 	return nil
 }
 
-func readNext(reader *pcapgo.Reader, inputFile *os.File, minimumLegalTimestamp int64, verbose bool) (packet, error) {
+func readNext(reader *pcapgo.Reader, inputFile *os.File, minimumLegalTimestamp int64, verbose bool) (minheap.Packet, error) {
 	for {
 		data, captureInfo, err := reader.ReadPacketData()
 		if err != nil {
@@ -164,7 +165,7 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, minimumLegalTimestamp i
 				}
 				inputFile.Close()
 
-				return packet{}, io.EOF
+				return minheap.Packet{}, io.EOF
 			}
 			if verbose {
 				log.Printf("%s: %v (skipping this packet)\n", inputFile.Name(), err)
@@ -192,7 +193,7 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, minimumLegalTimestamp i
 			minimumLegalTimestamp = captureInfo.Timestamp.UnixNano()
 		}
 
-		return packet{
+		return minheap.Packet{
 			Timestamp:             captureInfo.Timestamp.UnixNano(),
 			MinimumLegalTimestamp: minimumLegalTimestamp,
 			CaptureInfo:           captureInfo,
@@ -203,7 +204,7 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, minimumLegalTimestamp i
 	}
 }
 
-func write(writer *pcapgo.Writer, packetToWrite packet, verbose bool) {
+func write(writer *pcapgo.Writer, packetToWrite minheap.Packet, verbose bool) {
 	err := writer.WritePacket(packetToWrite.CaptureInfo, packetToWrite.Data)
 	if err != nil && verbose { // skip errors
 		log.Printf("write error: %v (skipping this packet)\n", err)
