@@ -28,6 +28,8 @@ When using `tcpslice` or `mergecap` sometimes `pcapfix` is needed to fix bad inp
 
 ## Installation
 
+Get an [already compiled binary](https://github.com/assafmo/joincap/releases) or do it yourself with:
+
 ```bash
 go get -u github.com/assafmo/joincap
 ```

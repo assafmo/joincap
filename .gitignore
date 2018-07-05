@@ -5,6 +5,4 @@ debug
 debug.test
 !pcap_examples/*.pcap
 !pcap_examples/*.pcap.gz
-cover.txt
-cover.html
-coverage.out
+release
