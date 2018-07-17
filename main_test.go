@@ -487,3 +487,11 @@ func TestExitOnDifferentLinkTypes(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func Benchmark(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		joincap([]string{"joincap",
+			"-w", "/dev/null",
+			"pcap_examples/ok.pcap", "pcap_examples/ok.pcap"})
+	}
+}
