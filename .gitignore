@@ -9,3 +9,10 @@ release
 *.out
 *.pb.gz
 *.test
+
+# snap
+stage
+snap
+prime
+parts
+*.snap
