@@ -24,3 +24,5 @@ snapcraft
 snapcraft push *.snap
 REV=$(snapcraft list-revisions joincap | head -2 | tail -1 | awk '{print $1}')
 snapcraft release joincap "$REV" stable
+snapcraft clean
+rm -rf snap
