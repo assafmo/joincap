@@ -15,3 +15,11 @@ GOOS=darwin  GOARCH=amd64 go build -o "release/joincap-macos64-${VERSION}"
     find -type f | 
     parallel --bar 'zip "$(echo "{}" | sed "s/.exe//").zip" "{}" && rm -f "{}"'
 )
+
+# snap
+
+snapcraft
+snapcraft push *.snap
+snapcraft list-revisions joincap
+REV=$(snapcraft list-revisions joincap | head -2 | tail -1 | awk '{print $1}')
+snapcraft release joincap "$REV" stable
