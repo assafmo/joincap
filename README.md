@@ -5,6 +5,7 @@ Merge multiple pcap files together, gracefully.
 [![CircleCI](https://circleci.com/gh/assafmo/joincap.svg?style=shield&circle-token=cd4f46d248b7601530558ae6559a20ff75a897ad)](https://circleci.com/gh/assafmo/joincap)
 [![Coverage Status](https://coveralls.io/repos/github/assafmo/joincap/badge.svg?branch=master)](https://coveralls.io/github/assafmo/joincap?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/assafmo/joincap)](https://goreportcard.com/report/github.com/assafmo/joincap)
+[![GoDoc](https://godoc.org/github.com/assafmo/joincap?status.svg)](https://godoc.org/github.com/assafmo/joincap)
 
 ## Why?
 
