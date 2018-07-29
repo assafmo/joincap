@@ -1,7 +1,5 @@
 // Merge multiple pcap files together, gracefully.
 //
-// Basic Usage
-//
 //  Usage:
 //    joincap [OPTIONS] InFiles...
 //
