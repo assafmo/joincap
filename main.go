@@ -27,7 +27,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const version = "0.8.7"
+const version = "0.8.8"
 const maxSnaplen = 262144
 
 func main() {
@@ -172,9 +172,19 @@ func initHeapWithInputFiles(inputFilePaths []string, minTimeHeap *minheap.Packet
 	}
 
 	if verbose {
-		log.Printf("merging %d input files of size %f GiB\n",
-			minTimeHeap.Len(),
-			float64(totalInputSizeBytes)/1024/1024/1024)
+		mib := float64(totalInputSizeBytes) / 1024 / 1024
+		gib := mib / 1024
+		tib := gib / 1024
+
+		format := "merging %d input files of size %f %s\n"
+
+		if tib > 1 {
+			log.Printf(format, minTimeHeap.Len(), tib, "TiB")
+		} else if gib > 1 {
+			log.Printf(format, minTimeHeap.Len(), gib, "GiB")
+		} else {
+			log.Printf(format, minTimeHeap.Len(), mib, "MiB")
+		}
 	}
 
 	return linkType, nil
