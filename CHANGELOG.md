@@ -2,7 +2,7 @@
 
 ## v0.8.8 (Oct 24, 2018)
 
-- verbose: output in TiB or MiB if better applicable than GiB
+- humanize byte size printing in verbose mode (TiB, GiB, MiB, KiB)
 - minheap tests
 
 ## v0.8.7 (Jun 29, 2018)
