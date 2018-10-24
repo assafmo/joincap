@@ -19,7 +19,7 @@ GOOS=darwin  GOARCH=amd64 go build -o "release/joincap-macos64-${VERSION}"
 
 # publish ubuntu snap
 
-rm -f *.snap
+rm -f *.snap*
 snapcraft
 snapcraft push *.snap
 REV=$(snapcraft list-revisions joincap | head -2 | tail -1 | awk '{print $1}')
