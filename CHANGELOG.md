@@ -2,7 +2,7 @@
 
 ## v0.8.8 (Oct 24, 2018)
 
-- verbose: output in TiB or MiB if better understood than GiB
+- verbose: output in TiB or MiB if better applicable than GiB
 - minheap tests
 
 ## v0.8.7 (Jun 29, 2018)
