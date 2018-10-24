@@ -21,6 +21,7 @@ import (
 	"os"
 
 	"github.com/assafmo/joincap/minheap"
+	humanize "github.com/dustin/go-humanize"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcapgo"
 	flags "github.com/jessevdk/go-flags"
@@ -172,19 +173,9 @@ func initHeapWithInputFiles(inputFilePaths []string, minTimeHeap *minheap.Packet
 	}
 
 	if verbose {
-		mib := float64(totalInputSizeBytes) / 1024 / 1024
-		gib := mib / 1024
-		tib := gib / 1024
-
-		format := "merging %d input files of size %f %s\n"
-
-		if tib > 1 {
-			log.Printf(format, minTimeHeap.Len(), tib, "TiB")
-		} else if gib > 1 {
-			log.Printf(format, minTimeHeap.Len(), gib, "GiB")
-		} else {
-			log.Printf(format, minTimeHeap.Len(), mib, "MiB")
-		}
+		log.Printf("merging %d input files of size %s\n",
+			minTimeHeap.Len(),
+			humanize.IBytes(uint64(totalInputSizeBytes)))
 	}
 
 	return linkType, nil
