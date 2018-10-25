@@ -25,7 +25,6 @@ import (
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcapgo"
 	flags "github.com/jessevdk/go-flags"
-	"github.com/pkg/errors"
 )
 
 const version = "0.8.8"
@@ -57,7 +56,7 @@ func joincap(args []string) error {
 			// if -h flag, help is printed by the library on exit
 			return nil
 		}
-		return errors.Wrap(err, "cmd flags error")
+		return fmt.Errorf("cmd flags error: %v", err)
 	}
 
 	// if -V flag, print version and exit
@@ -74,14 +73,14 @@ func joincap(args []string) error {
 	heap.Init(&minTimeHeap)
 	linkType, err := initHeapWithInputFiles(cmdFlags.Rest.InFiles[1:], &minTimeHeap, cmdFlags.Verbose)
 	if err != nil {
-		return err
+		return fmt.Errorf("cannot initiate merge: %v", err)
 	}
 
 	outputFile := os.Stdout
 	if cmdFlags.OutputFilePath != "-" {
 		outputFile, err = os.Create(cmdFlags.OutputFilePath)
 		if err != nil {
-			return errors.Wrap(err, fmt.Sprintf("cannot open %s for writing", cmdFlags.OutputFilePath))
+			return fmt.Errorf("cannot open %s for writing: %v", cmdFlags.OutputFilePath, err)
 		}
 		defer outputFile.Close()
 	}
