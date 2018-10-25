@@ -27,7 +27,7 @@ import (
 	flags "github.com/jessevdk/go-flags"
 )
 
-const version = "0.8.8"
+const version = "0.8.9"
 const maxSnaplen = 262144
 
 func main() {
