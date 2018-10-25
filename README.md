@@ -19,7 +19,7 @@ Merge multiple pcap files together, gracefully.
 3.  Using `snap install` (Ubuntu):
 
     ```bash
-    sudo snap install joincap
+    snap install joincap
     ```
 
 ## Basic Usage
