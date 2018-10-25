@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.8.9 (Oct 25, 2018)
+
+- better wrap error messages
+
 ## v0.8.8 (Oct 24, 2018)
 
 - humanize byte size printing in verbose mode (TiB, GiB, MiB, KiB)
