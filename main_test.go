@@ -11,7 +11,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	os.Stderr = os.Stdin // so joincap -v won't pollute the output
+	os.Stderr = nil // so joincap -v won't pollute the output
 	os.Exit(m.Run())
 }
 
