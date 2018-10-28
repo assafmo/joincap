@@ -19,6 +19,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"time"
 
 	"github.com/assafmo/joincap/minheap"
 	humanize "github.com/dustin/go-humanize"
@@ -27,8 +28,10 @@ import (
 	flags "github.com/jessevdk/go-flags"
 )
 
-const version = "0.8.9"
+const version = "0.9.0"
 const maxSnaplen uint32 = 262144
+
+var priorTimestamp int64
 
 func main() {
 	err := joincap(os.Args)
@@ -107,7 +110,6 @@ func joincap(args []string) error {
 			nextPacket, err := readNext(
 				earliestPacket.Reader,
 				earliestPacket.InputFile,
-				earliestPacket.MinimumLegalTimestamp,
 				cmdFlags.Verbose)
 			if err == io.EOF {
 				break
@@ -163,9 +165,12 @@ func initHeapWithInputFiles(inputFilePaths []string, minTimeHeap *minheap.Packet
 				)
 		}
 
-		nextPacket, err := readNext(reader, inputFile, 0, verbose)
+		nextPacket, err := readNext(reader, inputFile, verbose)
 		if err == nil {
 			heap.Push(minTimeHeap, nextPacket)
+			if nextPacket.Timestamp < priorTimestamp {
+				priorTimestamp = nextPacket.Timestamp
+			}
 		} else {
 			log.Printf("%s: %v before first packet (skipping this file)\n", inputFile.Name(), err)
 		}
@@ -180,7 +185,7 @@ func initHeapWithInputFiles(inputFilePaths []string, minTimeHeap *minheap.Packet
 	return linkType, nil
 }
 
-func readNext(reader *pcapgo.Reader, inputFile *os.File, minimumLegalTimestamp int64, verbose bool) (minheap.Packet, error) {
+func readNext(reader *pcapgo.Reader, inputFile *os.File, verbose bool) (minheap.Packet, error) {
 	for {
 		data, captureInfo, err := reader.ReadPacketData()
 		if err != nil {
@@ -198,10 +203,12 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, minimumLegalTimestamp i
 			// skip errors
 			continue
 		}
-		if minimumLegalTimestamp > 0 &&
-			captureInfo.Timestamp.UnixNano() < minimumLegalTimestamp {
+		if captureInfo.Timestamp.UnixNano()+int64(time.Nanosecond*time.Hour) < priorTimestamp {
 			if verbose {
-				log.Printf("%s: illegal packet timestamp %v (skipping this packet)\n", inputFile.Name(), captureInfo.Timestamp)
+				log.Printf("%s: illegal packet timestamp %v - more than an hour before the prior packet's timestamp %v (skipping this packet)\n",
+					inputFile.Name(),
+					captureInfo.Timestamp,
+					time.Unix(0, priorTimestamp).UTC())
 			}
 			// skip errors
 			continue
@@ -214,17 +221,12 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, minimumLegalTimestamp i
 			continue
 		}
 
-		if minimumLegalTimestamp == 0 {
-			minimumLegalTimestamp = captureInfo.Timestamp.UnixNano()
-		}
-
 		return minheap.Packet{
-			Timestamp:             captureInfo.Timestamp.UnixNano(),
-			MinimumLegalTimestamp: minimumLegalTimestamp,
-			CaptureInfo:           captureInfo,
-			Data:                  data,
-			Reader:                reader,
-			InputFile:             inputFile,
+			Timestamp:   captureInfo.Timestamp.UnixNano(),
+			CaptureInfo: captureInfo,
+			Data:        data,
+			Reader:      reader,
+			InputFile:   inputFile,
 		}, nil
 	}
 }
@@ -234,4 +236,6 @@ func write(writer *pcapgo.Writer, packetToWrite minheap.Packet, verbose bool) {
 	if err != nil && verbose { // skip errors
 		log.Printf("write error: %v (skipping this packet)\n", err)
 	}
+
+	priorTimestamp = packetToWrite.Timestamp
 }

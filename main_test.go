@@ -437,9 +437,9 @@ func TestNormalOutputSnaplenOnBigInputSnaplen(t *testing.T) {
 	}
 }
 
-// TestIgnorePacketsWithTimeEarlierThanFirst packets with timestamp smaller than the
-// first packet should be ignored
-func TestIgnorePacketsWithTimeEarlierThanFirst(t *testing.T) {
+// TestIgnorePacketsWithTimeAnHourErlierThanPriorPacket packets with timestamp
+// more than an hour before prior packet should be ignored
+func TestIgnorePacketsWithTimeAnHourErlierThanPriorPacket(t *testing.T) {
 	outputFile, err := ioutil.TempFile("", "joincap_output_")
 	if err != nil {
 		t.Fatal(err)
@@ -451,8 +451,28 @@ func TestIgnorePacketsWithTimeEarlierThanFirst(t *testing.T) {
 		"-v", "-w", outputFile.Name(),
 		"pcap_examples/second_packet_time_is_too_small.pcap"})
 
-	// the second packet is edited to have 1970 date...
+	// the second packet is edited to be 68 minutes erlier than the first packet
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap)-1 {
+		t.FailNow()
+	}
+}
+
+// TestPacketsWithTimeLessThanHourBeforePriorPacketAreOK packets with timestamp
+// less than an hour before prior packet are ok
+func TestPacketsWithTimeLessThanHourBeforePriorPacketAreOK(t *testing.T) {
+	outputFile, err := ioutil.TempFile("", "joincap_output_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFile.Close()
+	defer os.Remove(outputFile.Name())
+
+	joincap([]string{"joincap",
+		"-v", "-w", outputFile.Name(),
+		"pcap_examples/second_packet_time_is_smaller_but_not_too_small.pcap"})
+
+	// the second packet is edited to be 55 minutes erlier than the first packet
+	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
 		t.FailNow()
 	}
 }

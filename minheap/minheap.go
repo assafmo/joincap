@@ -10,12 +10,11 @@ import (
 // Packet is used by PacketHeap to order packets by timestamp
 // and by joincap to merge pcaps
 type Packet struct {
-	Timestamp             int64
-	MinimumLegalTimestamp int64
-	CaptureInfo           gopacket.CaptureInfo
-	Data                  []byte
-	Reader                *pcapgo.Reader
-	InputFile             *os.File
+	Timestamp   int64
+	CaptureInfo gopacket.CaptureInfo
+	Data        []byte
+	Reader      *pcapgo.Reader
+	InputFile   *os.File
 }
 
 // PacketHeap is a minimum heap of packets ordered by timestamp
