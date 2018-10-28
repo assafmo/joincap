@@ -351,21 +351,88 @@ func TestGzippedPcap(t *testing.T) {
 	}
 }
 
-// TestIgnoreTooSmallSnaplen snaplen should be ignored and we use our own snaplen
-func TestIgnoreTooSmallSnaplen(t *testing.T) {
+// TestNormalOutputSnaplenOnSmallInputSnaplen input snaplen should be ignored and we use our own snaplen
+func TestNormalOutputSnaplenOnSmallInputSnaplen(t *testing.T) {
 	outputFile, err := ioutil.TempFile("", "joincap_output_")
 	if err != nil {
 		t.Fatal(err)
 	}
-	outputFile.Close()
 	defer os.Remove(outputFile.Name())
+	defer outputFile.Close()
 
 	joincap([]string{"joincap",
 		"-v", "-w", outputFile.Name(),
 		"pcap_examples/very_small_snaplen.pcap"})
 
-	// snaplen is edited to be way too small
+	// snaplen of pcap_examples/very_small_snaplen.pcap
+	// is edited to be way too small
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
+		t.FailNow()
+	}
+
+	reader, err := pcapgo.NewReader(outputFile)
+	if err != nil {
+		t.FailNow()
+	}
+
+	if reader.Snaplen() != maxSnaplen {
+		t.FailNow()
+	}
+}
+
+// TestNormalOutputSnaplenOnNormalInputSnaplen input snaplen should be ignored and we use our own snaplen
+func TestNormalOutputSnaplenOnNormalInputSnaplen(t *testing.T) {
+	outputFile, err := ioutil.TempFile("", "joincap_output_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(outputFile.Name())
+	defer outputFile.Close()
+
+	// snaplen of pcap_examples/ok.pcap is normal
+	joincap([]string{"joincap",
+		"-v", "-w", outputFile.Name(),
+		okPcap})
+
+	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
+		t.FailNow()
+	}
+
+	reader, err := pcapgo.NewReader(outputFile)
+	if err != nil {
+		t.FailNow()
+	}
+
+	if reader.Snaplen() != maxSnaplen {
+		t.FailNow()
+	}
+}
+
+// TestNormalOutputSnaplenOnBigInputSnaplen input snaplen should be ignored and we use our own snaplen
+func TestNormalOutputSnaplenOnBigInputSnaplen(t *testing.T) {
+	outputFile, err := ioutil.TempFile("", "joincap_output_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(outputFile.Name())
+	defer outputFile.Close()
+
+	// snaplen of pcap_examples/very_big_snaplen.pcap
+	// is edited to be way too big
+	joincap([]string{"joincap",
+		"-v", "-w", outputFile.Name(),
+		"pcap_examples/very_big_snaplen.pcap"})
+
+	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
+		t.FailNow()
+	}
+
+	reader, err := pcapgo.NewReader(outputFile)
+	if err != nil {
+		t.FailNow()
+	}
+
+	if reader.Snaplen() != maxSnaplen {
 		t.FailNow()
 	}
 }
