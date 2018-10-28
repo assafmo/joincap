@@ -28,7 +28,7 @@ import (
 )
 
 const version = "0.8.9"
-const maxSnaplen = 262144
+const maxSnaplen uint32 = 262144
 
 func main() {
 	err := joincap(os.Args)
