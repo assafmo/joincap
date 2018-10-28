@@ -351,7 +351,7 @@ func TestGzippedPcap(t *testing.T) {
 	}
 }
 
-// TestIgnoreToSmallSnaplen snaplen should be ignored and we use our own snaplen
+// TestIgnoreTooSmallSnaplen snaplen should be ignored and we use our own snaplen
 func TestIgnoreTooSmallSnaplen(t *testing.T) {
 	outputFile, err := ioutil.TempFile("", "joincap_output_")
 	if err != nil {
@@ -364,7 +364,7 @@ func TestIgnoreTooSmallSnaplen(t *testing.T) {
 		"-v", "-w", outputFile.Name(),
 		"pcap_examples/very_small_snaplen.pcap"})
 
-	// snaplen is edited to be way to small
+	// snaplen is edited to be way too small
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
 		t.FailNow()
 	}
