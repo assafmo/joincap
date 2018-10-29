@@ -168,7 +168,10 @@ func initHeapWithInputFiles(inputFilePaths []string, minTimeHeap *minheap.Packet
 		nextPacket, err := readNext(reader, inputFile, verbose)
 		if err == nil {
 			heap.Push(minTimeHeap, nextPacket)
-			if nextPacket.Timestamp < priorTimestamp {
+
+			if priorTimestamp == 0 {
+				priorTimestamp = nextPacket.Timestamp
+			} else if nextPacket.Timestamp < priorTimestamp {
 				priorTimestamp = nextPacket.Timestamp
 			}
 		} else {
