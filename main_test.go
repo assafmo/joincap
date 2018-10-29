@@ -437,6 +437,27 @@ func TestNormalOutputSnaplenOnBigInputSnaplen(t *testing.T) {
 	}
 }
 
+// TestIgnorePacketsWithTimeEarlierThanFirst packets with timestamp smaller than the
+// first packet should be ignored
+// (Is this test necessary?)
+func TestIgnorePacketsWithTimeEarlierThanFirst(t *testing.T) {
+	outputFile, err := ioutil.TempFile("", "joincap_output_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFile.Close()
+	defer os.Remove(outputFile.Name())
+
+	joincap([]string{"joincap",
+		"-v", "-w", outputFile.Name(),
+		"pcap_examples/second_packet_time_is_1970.pcap"})
+
+	// the second packet is edited to have 1970 date...
+	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap)-1 {
+		t.FailNow()
+	}
+}
+
 // TestIgnorePacketsWithTimeAnHourErlierThanPriorPacket packets with timestamp
 // more than an hour before prior packet should be ignored
 func TestIgnorePacketsWithTimeAnHourErlierThanPriorPacket(t *testing.T) {
