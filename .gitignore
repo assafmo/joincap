@@ -9,6 +9,7 @@ release
 *.out
 *.pb.gz
 *.test
+*pprof*
 
 # snap
 stage
