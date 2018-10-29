@@ -1,8 +1,12 @@
 # Changelog
 
+## v0.9.1 (Oct 29, 2018)
+
+- fix initialization of priorTimestamp (timestamp corruption check)
+
 ## v0.9.0 (Oct 28, 2018)
 
-- Detect bad packets if an hour earlier than previous packet
+- detect bad packets if an hour earlier than previous packet
 
 ## v0.8.9 (Oct 25, 2018)
 
