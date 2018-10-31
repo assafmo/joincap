@@ -110,7 +110,8 @@ func joincap(args []string) error {
 			nextPacket, err := readNext(
 				earliestPacket.Reader,
 				earliestPacket.InputFile,
-				cmdFlags.Verbose)
+				cmdFlags.Verbose,
+				false)
 			if err == io.EOF {
 				break
 			}
@@ -165,7 +166,7 @@ func initHeapWithInputFiles(inputFilePaths []string, minTimeHeap *minheap.Packet
 				)
 		}
 
-		nextPacket, err := readNext(reader, inputFile, verbose)
+		nextPacket, err := readNext(reader, inputFile, verbose, true)
 		if err == nil {
 			heap.Push(minTimeHeap, nextPacket)
 
@@ -188,7 +189,7 @@ func initHeapWithInputFiles(inputFilePaths []string, minTimeHeap *minheap.Packet
 	return linkType, nil
 }
 
-func readNext(reader *pcapgo.Reader, inputFile *os.File, verbose bool) (minheap.Packet, error) {
+func readNext(reader *pcapgo.Reader, inputFile *os.File, verbose bool, isInit bool) (minheap.Packet, error) {
 	for {
 		data, captureInfo, err := reader.ReadPacketData()
 		if err != nil {
@@ -206,7 +207,7 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, verbose bool) (minheap.
 			// skip errors
 			continue
 		}
-		if captureInfo.Timestamp.UnixNano()+int64(time.Nanosecond*time.Hour) < priorTimestamp {
+		if !isInit && captureInfo.Timestamp.UnixNano()+int64(time.Nanosecond*time.Hour) < priorTimestamp {
 			if verbose {
 				log.Printf("%s: illegal packet timestamp %v - more than an hour before the prior packet's timestamp %v (skipping this packet)\n",
 					inputFile.Name(),
