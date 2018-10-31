@@ -576,7 +576,7 @@ func TestWriteToNonExistingDirectory(t *testing.T) {
 }
 
 // TestExitOnDifferentLinkTypes test cannot merge different linktypes
-func TestExitOnDifferentLinkTypes(t *testing.T) {
+func TestMixDifferentLinkTypes(t *testing.T) {
 	outputFile, err := ioutil.TempFile("", "joincap_output_")
 	if err != nil {
 		t.Fatal(err)
@@ -584,14 +584,17 @@ func TestExitOnDifferentLinkTypes(t *testing.T) {
 	outputFile.Close()
 	defer os.Remove(outputFile.Name())
 
+	linktypeArcnet := "pcap_examples/linktype_arcnet.pcap"
+
 	err = joincap([]string{"joincap",
 		"-v", "-w", outputFile.Name(),
-		"pcap_examples/ok.pcap", "pcap_examples/linktype_unknown.pcap"})
+		okPcap, linktypeArcnet})
 
-	if err == nil {
-		t.Fatal("Shouldn't exited without an error")
-	}
-	if !strings.Contains(err.Error(), "different linktypes") {
+	testIsOrdered(t, outputFile.Name())
+
+	outputCount := packetCount(t, outputFile.Name())
+
+	if outputCount != packetCount(t, okPcap)+packetCount(t, linktypeArcnet) {
 		t.FailNow()
 	}
 }

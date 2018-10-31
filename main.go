@@ -157,13 +157,7 @@ func initHeapWithInputFiles(inputFilePaths []string, minTimeHeap *minheap.Packet
 		if linkType == layers.LinkTypeNull {
 			linkType = reader.LinkType()
 		} else if linkType != reader.LinkType() {
-			return layers.LinkTypeNull,
-				fmt.Errorf(
-					"%s: different linktypes: %v %v",
-					inputFile.Name(),
-					linkType,
-					reader.LinkType(),
-				)
+			linkType = layers.LinkTypeEthernet
 		}
 
 		nextPacket, err := readNext(reader, inputFile, verbose, true)
