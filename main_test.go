@@ -641,8 +641,8 @@ func TestInputFilePassingOrderDoesNotMatter(t *testing.T) {
 	outputFile2.Close()
 	defer os.Remove(outputFile2.Name())
 
-	big := "pcap_examples/big-endian-netlink.pcap"
-	little := "pcap_examples/little-endian-netlink.pcap"
+	big := "pcap_examples/big-endian-netlink.pcap"       // date 2016-09-17
+	little := "pcap_examples/little-endian-netlink.pcap" // date 2016-08-12
 
 	joincap([]string{"joincap",
 		"-v", "-w", outputFile1.Name(),
