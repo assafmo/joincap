@@ -653,20 +653,22 @@ func TestWriteToNonExistingDirectory(t *testing.T) {
 	}
 }
 
-// TestExitOnDifferentLinkTypes test cannot merge different linktypes
+// TestMixDifferentLinkTypes it's ok to mix input linktype
+// output linktype will be "Ethernet"
 func TestMixDifferentLinkTypes(t *testing.T) {
 	outputFile, err := ioutil.TempFile("", "joincap_output_")
 	if err != nil {
 		t.Fatal(err)
 	}
-	outputFile.Close()
 	defer os.Remove(outputFile.Name())
+	defer outputFile.Close()
 
 	linktypeArcnet := "pcap_examples/linktype_arcnet.pcap"
+	linktypeNetlink := "pcap_examples/little-endian-netlink.pcap"
 
 	err = joincap([]string{"joincap",
 		"-v", "-w", outputFile.Name(),
-		okPcap, linktypeArcnet})
+		linktypeNetlink, linktypeArcnet})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -675,8 +677,18 @@ func TestMixDifferentLinkTypes(t *testing.T) {
 
 	outputCount := packetCount(t, outputFile.Name())
 
-	if outputCount != packetCount(t, okPcap)+packetCount(t, linktypeArcnet) {
-		t.FailNow()
+	if outputCount != packetCount(t, linktypeNetlink)+packetCount(t, linktypeArcnet) {
+		t.Fatal("error counting")
+	}
+
+	outReader, err := pcapgo.NewReader(outputFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if outReader.LinkType() != layers.LinkTypeEthernet {
+		t.Fatalf("error should be the same linktype: %v, %v",
+			outReader.LinkType(), layers.LinkTypeEthernet)
 	}
 }
 
