@@ -2,7 +2,7 @@
 
 ## v0.10.0 (Oct 31, 2018)
 
-- allow mixing of input linktypes
+- allow mixing of different input linktypes
 
 ## v0.9.2 (Oct 31, 2018)
 
