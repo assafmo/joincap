@@ -680,31 +680,55 @@ func TestMixDifferentLinkTypes(t *testing.T) {
 	}
 }
 
-func TestOutputLinkType(t *testing.T) {
+// TestOutputLinkTypeSameInputLinkType same input linktype shoud
+// stay the same linktype in output file
+func TestOutputLinkTypeSameInputLinkType(t *testing.T) {
+	testLinkTypeFor := func(inFilePath string) {
 	outputFile, err := ioutil.TempFile("", "joincap_output_")
 	if err != nil {
 		t.Fatal(err)
 	}
-	outputFile.Close()
 	defer os.Remove(outputFile.Name())
-
-	linktypeArcnet := "pcap_examples/linktype_arcnet.pcap"
+		defer outputFile.Close()
 
 	err = joincap([]string{"joincap",
 		"-v", "-w", outputFile.Name(),
-		linktypeArcnet, linktypeArcnet})
+			inFilePath, inFilePath})
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	testIsOrdered(t, outputFile.Name())
 
-	if packetCount(t, outputFile.Name()) != packetCount(t, linktypeArcnet)*2 {
-		t.FailNow()
+		if packetCount(t, outputFile.Name()) != packetCount(t, inFilePath)*2 {
+			t.Fatal("error counting")
+		}
+
+		inputFile, err := os.Open(inFilePath)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer inputFile.Close()
+
+		inReader, err := pcapgo.NewReader(inputFile)
+		if err != nil {
+			t.Fatal(err)
+
 	}
+
+		outReader, err := pcapgo.NewReader(outputFile)
+		if err != nil {
+			t.Fatal(err)
 }
 
-// TestMixLittleBigEndian test it's ok to mix input endianess
+		if outReader.LinkType() != inReader.LinkType() {
+			t.Fatalf("error should be the same linktype: %v, %v",
+				outReader.LinkType(), inReader.LinkType())
+		}
+	}
+	testLinkTypeFor("pcap_examples/linktype_arcnet.pcap")
+	testLinkTypeFor(okPcap)
+}
 func TestMixLittleBigEndian(t *testing.T) {
 	outputFile, err := ioutil.TempFile("", "joincap_output_")
 	if err != nil {
