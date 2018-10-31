@@ -174,7 +174,7 @@ func initHeapWithInputFiles(inputFilePaths []string, minTimeHeap *minheap.Packet
 			} else if nextPacket.Timestamp < priorTimestamp {
 				priorTimestamp = nextPacket.Timestamp
 			}
-		} else {
+		} else if verbose {
 			log.Printf("%s: %v before first packet (skipping this file)\n", inputFile.Name(), err)
 		}
 	}
