@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/gopacket/layers"
+
 	"github.com/google/gopacket/pcapgo"
 )
 
@@ -45,7 +47,7 @@ func packetCount(t *testing.T, pcapPath string) uint64 {
 func TestHelperPacketCount(t *testing.T) {
 	// tcpdump -r pcap_examples/ok.pcap -qn | wc -l
 	if packetCount(t, okPcap) != 851 {
-		t.FailNow()
+		t.Fatal("error counting")
 	}
 }
 
@@ -131,7 +133,7 @@ func TestCount(t *testing.T) {
 	}
 
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap)*2 {
-		t.FailNow()
+		t.Fatal("error counting")
 	}
 }
 
@@ -174,7 +176,7 @@ func TestIgnoreInputFileCorruptGlobalHeader(t *testing.T) {
 	}
 
 	if packetCount(t, outputFile.Name()) != 0 {
-		t.FailNow()
+		t.Fatal("error counting")
 	}
 }
 
@@ -198,7 +200,7 @@ func TestIgnorePacketWithCorruptHeader(t *testing.T) {
 
 	// bad_first_header.pcap is ok.pcap with its first packet header ruined
 	if (packetCount(t, okPcap)*2)-1 != packetCount(t, outputFile.Name()) {
-		t.FailNow()
+		t.Fatal("error counting")
 	}
 }
 
@@ -221,7 +223,7 @@ func TestIgnoreTruncatedPacketEOF(t *testing.T) {
 	testIsOrdered(t, outputFile.Name())
 
 	if packetCount(t, outputFile.Name()) != 1 {
-		t.FailNow()
+		t.Fatal("error counting")
 	}
 }
 
@@ -244,7 +246,7 @@ func TestIgnoreEmptyPcap(t *testing.T) {
 	testIsOrdered(t, outputFile.Name())
 
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
-		t.FailNow()
+		t.Fatal("error counting")
 	}
 }
 
@@ -267,7 +269,7 @@ func TestIgnoreInputFileTruncatedGlobalHeader(t *testing.T) {
 	testIsOrdered(t, outputFile.Name())
 
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
-		t.FailNow()
+		t.Fatal("error counting")
 	}
 }
 
@@ -290,7 +292,7 @@ func TestIgnoreInputFileTruncatedFirstPacketHeader(t *testing.T) {
 	testIsOrdered(t, outputFile.Name())
 
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
-		t.FailNow()
+		t.Fatal("error counting")
 	}
 }
 
@@ -313,7 +315,7 @@ func TestIgnoreInputFileDoesNotExists(t *testing.T) {
 	testIsOrdered(t, outputFile.Name())
 
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
-		t.FailNow()
+		t.Fatal("error counting")
 	}
 }
 
@@ -336,7 +338,7 @@ func TestIgnoreInputFileIsDirectory(t *testing.T) {
 	testIsOrdered(t, outputFile.Name())
 
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
-		t.FailNow()
+		t.Fatal("error counting")
 	}
 }
 
@@ -360,7 +362,7 @@ func TestIgnoreGarbageEndingOfPcap(t *testing.T) {
 
 	// bad_end.pcap is ok.pcap with the last packet header ruined and garbage appended to it
 	if packetCount(t, outputFile.Name()) != (packetCount(t, okPcap)*2)-1 {
-		t.FailNow()
+		t.Fatal("error counting")
 	}
 }
 
@@ -383,7 +385,7 @@ func TestGzippedPcap(t *testing.T) {
 	testIsOrdered(t, outputFile.Name())
 
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap)*2 {
-		t.FailNow()
+		t.Fatal("error counting")
 	}
 }
 
@@ -408,16 +410,16 @@ func TestNormalOutputSnaplenOnSmallInputSnaplen(t *testing.T) {
 	// snaplen of pcap_examples/very_small_snaplen.pcap
 	// is edited to be way too small
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
-		t.FailNow()
+		t.Fatal("error counting")
 	}
 
 	reader, err := pcapgo.NewReader(outputFile)
 	if err != nil {
-		t.FailNow()
+		t.Fatal(err)
 	}
 
 	if reader.Snaplen() != maxSnaplen {
-		t.FailNow()
+		t.Fatalf("error checking snaplen: %v should be %v", reader.Snaplen(), maxSnaplen)
 	}
 }
 
@@ -441,16 +443,16 @@ func TestNormalOutputSnaplenOnNormalInputSnaplen(t *testing.T) {
 	testIsOrdered(t, outputFile.Name())
 
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
-		t.FailNow()
+		t.Fatal("error counting")
 	}
 
 	reader, err := pcapgo.NewReader(outputFile)
 	if err != nil {
-		t.FailNow()
+		t.Fatal(err)
 	}
 
 	if reader.Snaplen() != maxSnaplen {
-		t.FailNow()
+		t.Fatalf("error checking snaplen: %v should be %v", reader.Snaplen(), maxSnaplen)
 	}
 }
 
@@ -475,16 +477,16 @@ func TestNormalOutputSnaplenOnBigInputSnaplen(t *testing.T) {
 	testIsOrdered(t, outputFile.Name())
 
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
-		t.FailNow()
+		t.Fatal("error counting")
 	}
 
 	reader, err := pcapgo.NewReader(outputFile)
 	if err != nil {
-		t.FailNow()
+		t.Fatal(err)
 	}
 
 	if reader.Snaplen() != maxSnaplen {
-		t.FailNow()
+		t.Fatalf("error checking snaplen: %v should be %v", reader.Snaplen(), maxSnaplen)
 	}
 }
 
@@ -510,7 +512,7 @@ func TestIgnorePacketsWithTimeEarlierThanFirst(t *testing.T) {
 
 	// the second packet is edited to have 1970 date...
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap)-1 {
-		t.FailNow()
+		t.Fatal("error counting")
 	}
 }
 
@@ -535,7 +537,7 @@ func TestIgnorePacketsWithTimeAnHourErlierThanpreviousPacket(t *testing.T) {
 
 	// the second packet is edited to be 68 minutes erlier than the first packet
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap)-1 {
-		t.FailNow()
+		t.Fatal("error counting")
 	}
 }
 
@@ -566,7 +568,7 @@ func TestPacketsWithTimeLessThanHourBeforePreviousPacketAreOK(t *testing.T) {
 
 	// the second packet is edited to be 55 minutes erlier than the first packet
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
-		t.FailNow()
+		t.Fatal("error counting")
 	}
 }
 
@@ -696,21 +698,21 @@ func TestMixDifferentLinkTypes(t *testing.T) {
 // stay the same linktype in output file
 func TestOutputLinkTypeSameInputLinkType(t *testing.T) {
 	testLinkTypeFor := func(inFilePath string) {
-	outputFile, err := ioutil.TempFile("", "joincap_output_")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.Remove(outputFile.Name())
+		outputFile, err := ioutil.TempFile("", "joincap_output_")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer os.Remove(outputFile.Name())
 		defer outputFile.Close()
 
-	err = joincap([]string{"joincap",
-		"-v", "-w", outputFile.Name(),
+		err = joincap([]string{"joincap",
+			"-v", "-w", outputFile.Name(),
 			inFilePath, inFilePath})
-	if err != nil {
-		t.Fatal(err)
-	}
+		if err != nil {
+			t.Fatal(err)
+		}
 
-	testIsOrdered(t, outputFile.Name())
+		testIsOrdered(t, outputFile.Name())
 
 		if packetCount(t, outputFile.Name()) != packetCount(t, inFilePath)*2 {
 			t.Fatal("error counting")
@@ -726,12 +728,12 @@ func TestOutputLinkTypeSameInputLinkType(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 
-	}
+		}
 
 		outReader, err := pcapgo.NewReader(outputFile)
 		if err != nil {
 			t.Fatal(err)
-}
+		}
 
 		if outReader.LinkType() != inReader.LinkType() {
 			t.Fatalf("error should be the same linktype: %v, %v",
@@ -741,6 +743,8 @@ func TestOutputLinkTypeSameInputLinkType(t *testing.T) {
 	testLinkTypeFor("pcap_examples/linktype_arcnet.pcap")
 	testLinkTypeFor(okPcap)
 }
+
+// TestMixLittleBigEndian it's ok to mix input endianess
 func TestMixLittleBigEndian(t *testing.T) {
 	outputFile, err := ioutil.TempFile("", "joincap_output_")
 	if err != nil {
@@ -766,13 +770,13 @@ func TestMixLittleBigEndian(t *testing.T) {
 	outputCount := packetCount(t, outputFile.Name())
 
 	if outputCount != bigCount+littleCount {
-		t.FailNow()
+		t.Fatal("error counting")
 	}
 }
 
-//TestInputFilePassingOrderDoesNotMatter input files passing order does not matter,
-//e.g. 'joincap 1.pcap 2.pcap' == 'joincap 2.pcap 1.pcap', even if their dates
-//are very far (tests bug introduced in v0.9.0)
+// TestInputFilePassingOrderDoesNotMatter input files passing order does not matter,
+// e.g. 'joincap 1.pcap 2.pcap' == 'joincap 2.pcap 1.pcap', even if their dates
+// are very far (tests bug introduced in v0.9.0)
 func TestInputFilePassingOrderDoesNotMatter(t *testing.T) {
 	outputFile1, err := ioutil.TempFile("", "joincap_output_1_")
 	if err != nil {
@@ -803,7 +807,7 @@ func TestInputFilePassingOrderDoesNotMatter(t *testing.T) {
 	testIsOrdered(t, outputFile1.Name())
 
 	if packetCount(t, outputFile1.Name()) != bigCount+littleCount {
-		t.FailNow()
+		t.Fatal("error counting")
 	}
 
 	err = joincap([]string{"joincap",
@@ -816,7 +820,7 @@ func TestInputFilePassingOrderDoesNotMatter(t *testing.T) {
 	testIsOrdered(t, outputFile2.Name())
 
 	if packetCount(t, outputFile2.Name()) != bigCount+littleCount {
-		t.FailNow()
+		t.Fatal("error counting")
 	}
 }
 
