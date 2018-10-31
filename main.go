@@ -31,7 +31,7 @@ import (
 const version = "0.9.1"
 const maxSnaplen uint32 = 262144
 
-var priorTimestamp int64
+var previousTimestamp int64
 
 func main() {
 	err := joincap(os.Args)
@@ -170,10 +170,10 @@ func initHeapWithInputFiles(inputFilePaths []string, minTimeHeap *minheap.Packet
 		if err == nil {
 			heap.Push(minTimeHeap, nextPacket)
 
-			if priorTimestamp == 0 {
-				priorTimestamp = nextPacket.Timestamp
-			} else if nextPacket.Timestamp < priorTimestamp {
-				priorTimestamp = nextPacket.Timestamp
+			if previousTimestamp == 0 {
+				previousTimestamp = nextPacket.Timestamp
+			} else if nextPacket.Timestamp < previousTimestamp {
+				previousTimestamp = nextPacket.Timestamp
 			}
 		} else if verbose {
 			log.Printf("%s: %v before first packet (skipping this file)\n", inputFile.Name(), err)
@@ -207,12 +207,12 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, verbose bool, isInit bo
 			// skip errors
 			continue
 		}
-		if !isInit && captureInfo.Timestamp.UnixNano()+int64(time.Nanosecond*time.Hour) < priorTimestamp {
+		if !isInit && captureInfo.Timestamp.UnixNano()+int64(time.Nanosecond*time.Hour) < previousTimestamp {
 			if verbose {
-				log.Printf("%s: illegal packet timestamp %v - more than an hour before the prior packet's timestamp %v (skipping this packet)\n",
+				log.Printf("%s: illegal packet timestamp %v - more than an hour before the previous packet's timestamp %v (skipping this packet)\n",
 					inputFile.Name(),
 					captureInfo.Timestamp,
-					time.Unix(0, priorTimestamp).UTC())
+					time.Unix(0, previousTimestamp).UTC())
 			}
 			// skip errors
 			continue
@@ -241,5 +241,5 @@ func write(writer *pcapgo.Writer, packetToWrite minheap.Packet, verbose bool) {
 		log.Printf("write error: %v (skipping this packet)\n", err)
 	}
 
-	priorTimestamp = packetToWrite.Timestamp
+	previousTimestamp = packetToWrite.Timestamp
 }

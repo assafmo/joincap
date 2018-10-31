@@ -458,9 +458,9 @@ func TestIgnorePacketsWithTimeEarlierThanFirst(t *testing.T) {
 	}
 }
 
-// TestIgnorePacketsWithTimeAnHourErlierThanPriorPacket packets with timestamp
-// more than an hour before prior packet should be ignored
-func TestIgnorePacketsWithTimeAnHourErlierThanPriorPacket(t *testing.T) {
+// TestIgnorePacketsWithTimeAnHourErlierThanpreviousPacket packets with timestamp
+// more than an hour before previous packet should be ignored
+func TestIgnorePacketsWithTimeAnHourErlierThanpreviousPacket(t *testing.T) {
 	outputFile, err := ioutil.TempFile("", "joincap_output_")
 	if err != nil {
 		t.Fatal(err)
@@ -478,9 +478,9 @@ func TestIgnorePacketsWithTimeAnHourErlierThanPriorPacket(t *testing.T) {
 	}
 }
 
-// TestPacketsWithTimeLessThanHourBeforePriorPacketAreOK packets with timestamp
-// less than an hour before prior packet are ok
-func TestPacketsWithTimeLessThanHourBeforePriorPacketAreOK(t *testing.T) {
+// TestPacketsWithTimeLessThanHourBeforepreviousPacketAreOK packets with timestamp
+// less than an hour before previous packet are ok
+func TestPacketsWithTimeLessThanHourBeforepreviousPacketAreOK(t *testing.T) {
 	outputFile, err := ioutil.TempFile("", "joincap_output_")
 	if err != nil {
 		t.Fatal(err)
