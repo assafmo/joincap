@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.10.0 (Oct 31, 2018)
+
+- allow mixing of input linktypes
+
 ## v0.9.2 (Oct 31, 2018)
 
 - fix bug introduced in v0.9.0 - input file passing order can make previousTimestamp be initialized wrong and reject later input files
