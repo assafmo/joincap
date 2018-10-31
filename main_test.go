@@ -596,7 +596,7 @@ func TestExitOnDifferentLinkTypes(t *testing.T) {
 	}
 }
 
-// TestMixLittleBigEndian
+// TestMixLittleBigEndian test it's ok to mix input endianess
 func TestMixLittleBigEndian(t *testing.T) {
 	outputFile, err := ioutil.TempFile("", "joincap_output_")
 	if err != nil {
@@ -619,6 +619,50 @@ func TestMixLittleBigEndian(t *testing.T) {
 	outputCount := packetCount(t, outputFile.Name())
 
 	if outputCount != bigCount+littleCount {
+		t.FailNow()
+	}
+}
+
+//TestInputFilePassingOrderDoesNotMatter input files passing order does not matter,
+//e.g. 'joincap 1.pcap 2.pcap' == 'joincap 2.pcap 1.pcap', even if their dates
+//are very far (tests bug introduced in v0.9.0)
+func TestInputFilePassingOrderDoesNotMatter(t *testing.T) {
+	outputFile1, err := ioutil.TempFile("", "joincap_output_1_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFile1.Close()
+	defer os.Remove(outputFile1.Name())
+
+	outputFile2, err := ioutil.TempFile("", "joincap_output_2_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFile2.Close()
+	defer os.Remove(outputFile2.Name())
+
+	big := "pcap_examples/big-endian-netlink.pcap"
+	little := "pcap_examples/little-endian-netlink.pcap"
+
+	joincap([]string{"joincap",
+		"-v", "-w", outputFile1.Name(),
+		big, little})
+	joincap([]string{"joincap",
+		"-v", "-w", outputFile2.Name(),
+		little, big})
+
+	testIsOrdered(t, outputFile1.Name())
+	testIsOrdered(t, outputFile2.Name())
+
+	bigCount := packetCount(t, big)
+	littleCount := packetCount(t, little)
+	output1Count := packetCount(t, outputFile1.Name())
+	output2Count := packetCount(t, outputFile2.Name())
+
+	if output1Count != bigCount+littleCount {
+		t.FailNow()
+	}
+	if output2Count != bigCount+littleCount {
 		t.FailNow()
 	}
 }
