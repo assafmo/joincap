@@ -364,6 +364,8 @@ func TestNormalOutputSnaplenOnSmallInputSnaplen(t *testing.T) {
 		"-v", "-w", outputFile.Name(),
 		"pcap_examples/very_small_snaplen.pcap"})
 
+	testIsOrdered(t, outputFile.Name())
+
 	// snaplen of pcap_examples/very_small_snaplen.pcap
 	// is edited to be way too small
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
@@ -394,6 +396,8 @@ func TestNormalOutputSnaplenOnNormalInputSnaplen(t *testing.T) {
 		"-v", "-w", outputFile.Name(),
 		okPcap})
 
+	testIsOrdered(t, outputFile.Name())
+
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
 		t.FailNow()
 	}
@@ -422,6 +426,8 @@ func TestNormalOutputSnaplenOnBigInputSnaplen(t *testing.T) {
 	joincap([]string{"joincap",
 		"-v", "-w", outputFile.Name(),
 		"pcap_examples/very_big_snaplen.pcap"})
+
+	testIsOrdered(t, outputFile.Name())
 
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
 		t.FailNow()
@@ -452,6 +458,8 @@ func TestIgnorePacketsWithTimeEarlierThanFirst(t *testing.T) {
 		"-v", "-w", outputFile.Name(),
 		"pcap_examples/second_packet_time_is_1970.pcap"})
 
+	testIsOrdered(t, outputFile.Name())
+
 	// the second packet is edited to have 1970 date...
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap)-1 {
 		t.FailNow()
@@ -472,15 +480,17 @@ func TestIgnorePacketsWithTimeAnHourErlierThanpreviousPacket(t *testing.T) {
 		"-v", "-w", outputFile.Name(),
 		"pcap_examples/second_packet_time_is_too_small.pcap"})
 
+	testIsOrdered(t, outputFile.Name())
+
 	// the second packet is edited to be 68 minutes erlier than the first packet
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap)-1 {
 		t.FailNow()
 	}
 }
 
-// TestPacketsWithTimeLessThanHourBeforepreviousPacketAreOK packets with timestamp
+// TestPacketsWithTimeLessThanHourBeforePreviousPacketAreOK packets with timestamp
 // less than an hour before previous packet are ok
-func TestPacketsWithTimeLessThanHourBeforepreviousPacketAreOK(t *testing.T) {
+func TestPacketsWithTimeLessThanHourBeforePreviousPacketAreOK(t *testing.T) {
 	outputFile, err := ioutil.TempFile("", "joincap_output_")
 	if err != nil {
 		t.Fatal(err)
@@ -491,6 +501,14 @@ func TestPacketsWithTimeLessThanHourBeforepreviousPacketAreOK(t *testing.T) {
 	joincap([]string{"joincap",
 		"-v", "-w", outputFile.Name(),
 		"pcap_examples/second_packet_time_is_smaller_but_not_too_small.pcap"})
+
+	isOutputOrdered, err := isTimeOrdered(outputFile.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if isOutputOrdered {
+		t.Fatal("input pcap is out of order - output pcap should also be out of order order")
+	}
 
 	// the second packet is edited to be 55 minutes erlier than the first packet
 	if packetCount(t, outputFile.Name()) != packetCount(t, okPcap) {
