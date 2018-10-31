@@ -694,9 +694,9 @@ func TestMixDifferentLinkTypes(t *testing.T) {
 	}
 }
 
-// TestOutputLinkTypeSameInputLinkType same input linktype shoud
+// TestOutputLinkTypeForSameInputLinkTypes same input linktype shoud
 // stay the same linktype in output file
-func TestOutputLinkTypeSameInputLinkType(t *testing.T) {
+func TestOutputLinkTypeForSameInputLinkTypes(t *testing.T) {
 	testLinkTypeFor := func(inFilePath string) {
 		outputFile, err := ioutil.TempFile("", "joincap_output_")
 		if err != nil {
