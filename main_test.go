@@ -596,6 +596,33 @@ func TestExitOnDifferentLinkTypes(t *testing.T) {
 	}
 }
 
+// TestMixLittleBigEndian
+func TestMixLittleBigEndian(t *testing.T) {
+	outputFile, err := ioutil.TempFile("", "joincap_output_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFile.Close()
+	defer os.Remove(outputFile.Name())
+
+	big := "pcap_examples/big-endian-netlink.pcap"
+	little := "pcap_examples/little-endian-netlink.pcap"
+
+	joincap([]string{"joincap",
+		"-v", "-w", outputFile.Name(),
+		big, little})
+
+	testIsOrdered(t, outputFile.Name())
+
+	bigCount := packetCount(t, big)
+	littleCount := packetCount(t, little)
+	outputCount := packetCount(t, outputFile.Name())
+
+	if outputCount != bigCount+littleCount {
+		t.FailNow()
+	}
+}
+
 func Benchmark(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		joincap([]string{"joincap",
