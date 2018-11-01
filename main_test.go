@@ -596,8 +596,14 @@ func TestPrintVersion(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if strings.TrimSpace(string(stdoutBytes)) != "joincap v"+version+" - https://github.com/assafmo/joincap" {
-		t.Fatal(strings.TrimSpace(string(stdoutBytes)), "joincap v"+version)
+	printed := string(stdoutBytes)
+
+	if !strings.Contains(printed, "joincap v"+version) {
+		t.Fatalf("version print doesn't contain 'joincap v%s'\n", version)
+	}
+
+	if !strings.Contains(printed, "https://github.com/assafmo/joincap") {
+		t.Fatal("version print doesn't contain 'https://github.com/assafmo/joincap'")
 	}
 }
 
