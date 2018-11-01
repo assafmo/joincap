@@ -206,7 +206,7 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, verbose bool, isInit bo
 			if verbose {
 				log.Printf("%s: illegal packet timestamp %v - more than an hour before the previous packet's timestamp %v (skipping this packet)\n",
 					inputFile.Name(),
-					captureInfo.Timestamp,
+					captureInfo.Timestamp.UTC(),
 					time.Unix(0, previousTimestamp).UTC())
 			}
 			// skip errors
