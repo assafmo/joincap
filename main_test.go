@@ -596,7 +596,7 @@ func TestPrintVersion(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if strings.TrimSpace(string(stdoutBytes)) != "joincap v"+version {
+	if strings.TrimSpace(string(stdoutBytes)) != "joincap v"+version+" - https://github.com/assafmo/joincap" {
 		t.Fatal(strings.TrimSpace(string(stdoutBytes)), "joincap v"+version)
 	}
 }
