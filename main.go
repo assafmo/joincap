@@ -57,6 +57,7 @@ func joincap(args []string) error {
 	if err != nil {
 		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
 			// if -h flag, help is printed by the library on exit
+			fmt.Printf("joincap v%s - https://github.com/assafmo/joincap\n", version)
 			return nil
 		}
 		return fmt.Errorf("cmd flags error: %v", err)
@@ -64,12 +65,12 @@ func joincap(args []string) error {
 
 	// if -V flag, print version and exit
 	if cmdFlags.Version {
-		fmt.Printf("joincap v%s\n", version)
+		fmt.Printf("joincap v%s - https://github.com/assafmo/joincap\n", version)
 		return nil
 	}
 
 	if cmdFlags.Verbose {
-		log.Printf("joincap v%s\n", version)
+		log.Printf("joincap v%s - https://github.com/assafmo/joincap\n", version)
 	}
 
 	minTimeHeap := minheap.PacketHeap{}
