@@ -202,7 +202,11 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, verbose bool, isInit bo
 			// skip errors
 			continue
 		}
-		if !isInit && captureInfo.Timestamp.UnixNano()+int64(time.Nanosecond*time.Hour) < previousTimestamp {
+
+		timestamp := captureInfo.Timestamp.UnixNano()
+		oneHour := int64(time.Nanosecond * time.Hour)
+
+		if !isInit && timestamp+oneHour < previousTimestamp {
 			if verbose {
 				log.Printf("%s: illegal packet timestamp %v - more than an hour before the previous packet's timestamp %v (skipping this packet)\n",
 					inputFile.Name(),
@@ -221,7 +225,7 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, verbose bool, isInit bo
 		}
 
 		return minheap.Packet{
-			Timestamp:   captureInfo.Timestamp.UnixNano(),
+			Timestamp:   timestamp,
 			CaptureInfo: captureInfo,
 			Data:        data,
 			Reader:      reader,
