@@ -650,6 +650,12 @@ func TestExitOnUnknownFlag(t *testing.T) {
 	}
 }
 
+// TestMainFunc main shoud call joincap and print it's returned error
+func TestMainFunc(t *testing.T) {
+	// TODO
+	main()
+}
+
 // TestWriteToNonExistingDirectory test writing to file in non existing directory
 func TestWriteToNonExistingDirectory(t *testing.T) {
 	err := joincap([]string{"joincap", "-v", "-w", "/banana/papaya.pcap"})
