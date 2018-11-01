@@ -79,9 +79,12 @@ func joincap(args []string) error {
 
 	minTimeHeap := minheap.PacketHeap{}
 	heap.Init(&minTimeHeap)
-	linkType, err := initHeapWithInputFiles(cmdFlags.Rest.InFiles[1:], &minTimeHeap, cmdFlags.Verbose)
+
+	inputFilePaths := cmdFlags.Rest.InFiles[1:]
+
+	linkType, err := initHeapWithInputFiles(inputFilePaths, &minTimeHeap, cmdFlags.Verbose)
 	if err != nil {
-		return fmt.Errorf("cannot initiate merge: %v", err)
+		return fmt.Errorf("cannot initialize merge: %v", err)
 	}
 
 	outputFile := os.Stdout
