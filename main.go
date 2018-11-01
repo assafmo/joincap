@@ -169,23 +169,25 @@ func initHeapWithInputFiles(inputFilePaths []string, minTimeHeap *minheap.Packet
 		}
 
 		nextPacket, err := readNext(reader, inputFile, verbose, true)
-		if err == nil {
-			heap.Push(minTimeHeap, nextPacket)
-
-			if previousTimestamp == 0 {
-				previousTimestamp = nextPacket.Timestamp
-			} else if nextPacket.Timestamp < previousTimestamp {
-				previousTimestamp = nextPacket.Timestamp
+		if err != nil {
+			if verbose {
+				log.Printf("%s: %v before first packet (skipping this file)\n", inputFile.Name(), err)
 			}
-		} else if verbose {
-			log.Printf("%s: %v before first packet (skipping this file)\n", inputFile.Name(), err)
+			continue
+		}
+
+		heap.Push(minTimeHeap, nextPacket)
+
+		if previousTimestamp == 0 {
+			previousTimestamp = nextPacket.Timestamp
+		} else if nextPacket.Timestamp < previousTimestamp {
+			previousTimestamp = nextPacket.Timestamp
 		}
 	}
 
 	if verbose {
-		log.Printf("merging %d input files of size %s\n",
-			minTimeHeap.Len(),
-			humanize.IBytes(uint64(totalInputSizeBytes)))
+		size := humanize.IBytes(uint64(totalInputSizeBytes))
+		log.Printf("merging %d input files of size %s\n", minTimeHeap.Len(), size)
 	}
 
 	return linkType, nil
