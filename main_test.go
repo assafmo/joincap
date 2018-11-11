@@ -653,7 +653,19 @@ func TestExitOnUnknownFlag(t *testing.T) {
 // TestMainFunc main shoud call joincap and print it's returned error
 func TestMainFunc(t *testing.T) {
 	// TODO
+	savedStdout := os.Stdout
+	defer func() { os.Stdout = savedStdout }()
+
+	stdoutTmpFile, err := ioutil.TempFile("", "joincap_output_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	filename := stdoutTmpFile.Name()
+	defer os.Remove(filename)
+
+	os.Stdout = stdoutTmpFile
 	main()
+	stdoutTmpFile.Close()
 }
 
 // TestWriteToNonExistingDirectory test writing to file in non existing directory
