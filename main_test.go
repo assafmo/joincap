@@ -650,7 +650,7 @@ func TestExitOnUnknownFlag(t *testing.T) {
 	}
 }
 
-// TestMainFunc main shoud call joincap and print it's returned error
+// TestMainFunc main shoud call joincap and print it's returned error (if exists)
 func TestMainFunc(t *testing.T) {
 	// TODO
 	savedStdout := os.Stdout
