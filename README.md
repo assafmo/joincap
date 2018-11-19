@@ -10,13 +10,13 @@ Merge multiple pcap files together, gracefully.
 ## Installation
 
 1.  Download a precompiled binary from https://github.com/assafmo/joincap/releases
-2.  Using `go get`:
+2.  Or... Use `go get`:
 
     ```bash
     go get -u github.com/assafmo/joincap
     ```
 
-3.  Using `snap install` (Ubuntu):
+3.  Or... Use `snap install` (Ubuntu):
 
     ```bash
     snap install joincap
