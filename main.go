@@ -57,7 +57,7 @@ func joincap(args []string) error {
 	if err != nil {
 		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
 			// if -h flag, help is printed by the library on exit
-			fmt.Printf("joincap v%s\n", version)
+			fmt.Printf("joincap v%s\n\n", version)
 			fmt.Println("Merge multiple pcap files together, gracefully.")
 			fmt.Println("For more info visit https://github.com/assafmo/joincap")
 			return nil
@@ -67,7 +67,7 @@ func joincap(args []string) error {
 
 	// if -V flag, print version and exit
 	if cmdFlags.Version {
-		fmt.Printf("joincap v%s\n", version)
+		fmt.Printf("joincap v%s\n\n", version)
 		fmt.Println("Merge multiple pcap files together, gracefully.")
 		fmt.Println("For more info visit https://github.com/assafmo/joincap")
 		return nil
