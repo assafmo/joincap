@@ -4,8 +4,7 @@ _tmpfs
 debug
 joincap
 debug.test
-!pcap_examples/*.pcap
-!pcap_examples/*.pcap.gz
+!test_pcaps/*
 release
 *.out
 *.pb.gz
