@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.10.1 (Feb 19, 2019)
+
+- print help messege if no input files were given
+
 ## v0.10.0 (Oct 31, 2018)
 
 - allow mixing of different input linktypes
