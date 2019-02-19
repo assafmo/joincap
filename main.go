@@ -55,11 +55,10 @@ func joincap(args []string) error {
 	_, err := flags.ParseArgs(&cmdFlags, args)
 
 	if err != nil {
-		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
+		flagsErr, ok := err.(*flags.Error)
+		if ok && flagsErr.Type == flags.ErrHelp {
 			// if -h flag, help is printed by the library on exit
-			fmt.Printf("joincap v%s\n\n", version)
-			fmt.Println("Merge multiple pcap files together, gracefully.")
-			fmt.Println("For more info visit https://github.com/assafmo/joincap")
+			printVersionSloganLink()
 			return nil
 		}
 		return fmt.Errorf("cmd flags error: %v", err)
@@ -67,9 +66,15 @@ func joincap(args []string) error {
 
 	// if -V flag, print version and exit
 	if cmdFlags.Version {
-		fmt.Printf("joincap v%s\n\n", version)
-		fmt.Println("Merge multiple pcap files together, gracefully.")
-		fmt.Println("For more info visit https://github.com/assafmo/joincap")
+		printVersionSloganLink()
+		return nil
+	}
+
+	inputFilePaths := cmdFlags.Rest.InFiles[1:]
+
+	if len(inputFilePaths) == 0 {
+		flags.NewParser(&cmdFlags, 0).WriteHelp(os.Stdout)
+		printVersionSloganLink()
 		return nil
 	}
 
@@ -79,8 +84,6 @@ func joincap(args []string) error {
 
 	minTimeHeap := minheap.PacketHeap{}
 	heap.Init(&minTimeHeap)
-
-	inputFilePaths := cmdFlags.Rest.InFiles[1:]
 
 	linkType, err := initHeapWithInputFiles(inputFilePaths, &minTimeHeap, cmdFlags.Verbose)
 	if err != nil {
@@ -136,6 +139,12 @@ func joincap(args []string) error {
 		}
 	}
 	return nil
+}
+
+func printVersionSloganLink() {
+	fmt.Printf("joincap v%s\n\n", version)
+	fmt.Println("Merge multiple pcap files together, gracefully.")
+	fmt.Println("For more info visit https://github.com/assafmo/joincap")
 }
 
 func initHeapWithInputFiles(inputFilePaths []string, minTimeHeap *minheap.PacketHeap, verbose bool) (layers.LinkType, error) {
