@@ -28,7 +28,7 @@ import (
 	flags "github.com/jessevdk/go-flags"
 )
 
-const version = "0.10.0"
+const version = "0.10.1"
 const maxSnaplen uint32 = 262144
 
 var previousTimestamp int64
