@@ -670,7 +670,7 @@ func TestMainFunc(t *testing.T) {
 
 // TestWriteToNonExistingDirectory test writing to file in non existing directory
 func TestWriteToNonExistingDirectory(t *testing.T) {
-	err := joincap([]string{"joincap", "-v", "-w", "/banana/papaya.pcap"})
+	err := joincap([]string{"joincap", "-v", "-w", "/banana/papaya.pcap", okPcap})
 	if err == nil {
 		t.Fatal("Shouldn't exited without an error")
 	}
