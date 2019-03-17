@@ -31,6 +31,8 @@ import (
 const version = "0.10.1"
 const maxSnaplen uint32 = 262144
 
+// previousTimestamp is the timestamp of the previous packet poped from the heap.
+// It helps us find bad/corrupted packets with weird timestamps.
 var previousTimestamp int64
 
 func main() {
@@ -57,14 +59,14 @@ func joincap(args []string) error {
 	if err != nil {
 		flagsErr, ok := err.(*flags.Error)
 		if ok && flagsErr.Type == flags.ErrHelp {
-			// if -h flag, help is printed by the library on exit
+			// If -h flag, help is printed by the library on exit
 			printVersionSloganLink()
 			return nil
 		}
 		return fmt.Errorf("cmd flags error: %v", err)
 	}
 
-	// if -V flag, print version and exit
+	// If -V flag, print version and exit
 	if cmdFlags.Version {
 		printVersionSloganLink()
 		return nil
@@ -82,6 +84,7 @@ func joincap(args []string) error {
 		log.Printf("joincap v%s - https://github.com/assafmo/joincap\n", version)
 	}
 
+	// Init a minimum heap by packet timestamp
 	minTimeHeap := minheap.PacketHeap{}
 	heap.Init(&minTimeHeap)
 
@@ -90,6 +93,7 @@ func joincap(args []string) error {
 		return fmt.Errorf("cannot initialize merge: %v", err)
 	}
 
+	// Init the output file
 	outputFile := os.Stdout
 	if cmdFlags.OutputFilePath != "-" {
 		outputFile, err = os.Create(cmdFlags.OutputFilePath)
@@ -107,8 +111,10 @@ func joincap(args []string) error {
 
 	writer := pcapgo.NewWriter(bufferedFileWriter)
 	writer.WriteFileHeader(maxSnaplen, linkType)
+
+	// Main loop
 	for minTimeHeap.Len() > 0 {
-		// find the earliest packet and write it to the output file
+		// Find the earliest packet and write it to the output file
 		earliestPacket := heap.Pop(&minTimeHeap).(minheap.Packet)
 		write(writer, earliestPacket, cmdFlags.Verbose)
 
@@ -117,23 +123,25 @@ func joincap(args []string) error {
 			earliestHeapTime = minTimeHeap[0].Timestamp
 		}
 		for {
-			// read the next packet from the source of the last written packet
+			// Read the next packet from the source of the last written packet
 			nextPacket, err := readNext(
 				earliestPacket.Reader,
 				earliestPacket.InputFile,
 				cmdFlags.Verbose,
 				false)
 			if err == io.EOF {
+				// Done with this source
 				break
 			}
 
 			if nextPacket.Timestamp <= earliestHeapTime {
-				// this is the earliest packet, write it to the output file
+				// This is the earliest packet, write it to the output file
+				// (Skip pushing it to the heap. This is much faster)
 				write(writer, nextPacket, cmdFlags.Verbose)
 				continue
 			}
 
-			// this is not the earliest packet, push it to the heap for sorting
+			// This is not the earliest packet, push it to the heap for sorting
 			heap.Push(&minTimeHeap, nextPacket)
 			break
 		}
@@ -147,10 +155,15 @@ func printVersionSloganLink() {
 	fmt.Println("For more info visit https://github.com/assafmo/joincap")
 }
 
+// initHeapWithInputFiles inits minTimeHeap with one packet from each source file.
+// It also returns the output LinkType, which is decided by the LinkTypes of all of the
+// input files.
 func initHeapWithInputFiles(inputFilePaths []string, minTimeHeap *minheap.PacketHeap, verbose bool) (layers.LinkType, error) {
 	var totalInputSizeBytes int64
 	var linkType layers.LinkType
+
 	for _, inputPcapPath := range inputFilePaths {
+		// Read the first packet and push it to the heap
 		inputFile, err := os.Open(inputPcapPath)
 		if err != nil {
 			if verbose {
@@ -172,8 +185,10 @@ func initHeapWithInputFiles(inputFilePaths []string, minTimeHeap *minheap.Packet
 
 		reader.SetSnaplen(maxSnaplen)
 		if linkType == layers.LinkTypeNull {
+			// Init
 			linkType = reader.LinkType()
 		} else if linkType != reader.LinkType() {
+			// Conflicting input LinkTypes. Use default type of Ethernet.
 			linkType = layers.LinkTypeEthernet
 		}
 
@@ -187,6 +202,7 @@ func initHeapWithInputFiles(inputFilePaths []string, minTimeHeap *minheap.Packet
 
 		heap.Push(minTimeHeap, nextPacket)
 
+		// Init previousTimestamp
 		if previousTimestamp == 0 {
 			previousTimestamp = nextPacket.Timestamp
 		} else if nextPacket.Timestamp < previousTimestamp {
@@ -207,6 +223,8 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, verbose bool, isInit bo
 		data, captureInfo, err := reader.ReadPacketData()
 		if err != nil {
 			if err == io.EOF {
+				// Done with this source
+
 				if verbose {
 					log.Printf("%s: done (closing)\n", inputFile.Name())
 				}
@@ -217,7 +235,7 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, verbose bool, isInit bo
 			if verbose {
 				log.Printf("%s: %v (skipping this packet)\n", inputFile.Name(), err)
 			}
-			// skip errors
+			// Skip errors
 			continue
 		}
 
@@ -231,14 +249,14 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, verbose bool, isInit bo
 					captureInfo.Timestamp.UTC(),
 					time.Unix(0, previousTimestamp).UTC())
 			}
-			// skip errors
+			// Skip errors
 			continue
 		}
 		if len(data) == 0 {
 			if verbose {
 				log.Printf("%s: empty data (skipping this packet)\n", inputFile.Name())
 			}
-			// skip errors
+			// Skip errors
 			continue
 		}
 
@@ -254,7 +272,7 @@ func readNext(reader *pcapgo.Reader, inputFile *os.File, verbose bool, isInit bo
 
 func write(writer *pcapgo.Writer, packetToWrite minheap.Packet, verbose bool) {
 	err := writer.WritePacket(packetToWrite.CaptureInfo, packetToWrite.Data)
-	if err != nil && verbose { // skip errors
+	if err != nil && verbose { // Skip errors
 		log.Printf("write error: %v (skipping this packet)\n", err)
 	}
 
