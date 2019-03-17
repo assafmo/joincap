@@ -31,7 +31,7 @@ import (
 const version = "0.10.1"
 const maxSnaplen uint32 = 262144
 
-// previousTimestamp is the timestamp of the previous packet poped from the heap.
+// previousTimestamp is the timestamp of the previous packet popped from the heap.
 // It helps us find bad/corrupted packets with weird timestamps.
 var previousTimestamp int64
 
