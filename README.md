@@ -16,12 +16,6 @@ Merge multiple pcap files together, gracefully.
   go get -u github.com/assafmo/joincap
   ```
 
-- Or... Use `snap install` (Ubuntu):
-
-  ```bash
-  snap install joincap
-  ```
-
 ## Basic Usage
 
 ```bash
