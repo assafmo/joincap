@@ -31,7 +31,7 @@ GOOS=darwin  GOARCH=amd64 go build -o "release/joincap-macos64-${VERSION}"
     cat > ./deb/DEBIAN/control <<EOF 
 Package: joincap
 Architecture: amd64
-Maintainer: @assafmo
+Maintainer: Assaf Morami <assaf.morami@gmail.com>
 Priority: optional
 Version: $(echo "${VERSION}" | tr -d v)
 Homepage: https://github.com/assafmo/joincap
