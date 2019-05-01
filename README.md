@@ -16,6 +16,15 @@ Merge multiple pcap files together, gracefully.
   go get -u github.com/assafmo/joincap
   ```
 
+- Or use Ubuntu PPA:
+
+  ```bash
+  curl -s --compressed https://assafmo.github.io/ppa/ubuntu/KEY.gpg | sudo apt-key add -
+  sudo curl -s --compressed -o /etc/apt/sources.list.d/assafmo.list https://assafmo.github.io/ppa/ubuntu/assafmo.list
+  sudo apt update
+  sudo apt install joincap
+  ```
+
 ## Basic Usage
 
 ```bash
