@@ -19,8 +19,28 @@ GOOS=windows GOARCH=amd64 go build -o "release/joincap-win64-${VERSION}.exe"
 GOOS=darwin  GOARCH=amd64 go build -o "release/joincap-macos64-${VERSION}"
 
 (
+    # zip
     set -e
     cd release
+
     find -type f | 
     parallel --bar 'zip "$(echo "{}" | sed "s/.exe//").zip" "{}" && rm -f "{}"'
+
+    # deb
+    mkdir -p ./deb/DEBIAN
+    cat > ./deb/DEBIAN/control <<EOF 
+Package: joincap
+Architecture: amd64
+Maintainer: @assafmo
+Priority: optional
+Version: $(echo "${VERSION}" | tr -d v)
+Homepage: https://github.com/assafmo/joincap
+Description: Merge multiple pcap files together, gracefully.
+EOF
+
+    mkdir -p ./deb/bin
+    unzip -o -d ./deb/bin joincap-linux64-*.zip
+    mv -f ./deb/bin/joincap-linux64-* ./deb/bin/joincap
+
+    dpkg-deb --build ./deb/ .
 )
