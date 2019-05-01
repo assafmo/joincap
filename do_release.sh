@@ -1,6 +1,13 @@
 #!/bin/bash
 
 # build into ./release/
+set -e
+set -v
+
+go get -v -u -t -d ./...
+
+go test -race -cover ./...
+
 rm -rf release
 mkdir -p release
 
@@ -12,6 +19,7 @@ GOOS=windows GOARCH=amd64 go build -o "release/joincap-win64-${VERSION}.exe"
 GOOS=darwin  GOARCH=amd64 go build -o "release/joincap-macos64-${VERSION}"
 
 (
+    set -e
     cd release
     find -type f | 
     parallel --bar 'zip "$(echo "{}" | sed "s/.exe//").zip" "{}" && rm -f "{}"'
