@@ -39,10 +39,7 @@ Priority: optional
 Architecture: amd64
 Maintainer: Assaf Morami <assaf.morami@gmail.com>
 Homepage: https://github.com/assafmo/joincap
-Installed-Size: $(stat --printf="%s" ./deb/bin/joincap)
-Provides: joincap
-Conflicts: joincap
-Replaces: joincap
+Installed-Size: $(ls -l --block-size=KB ./deb/bin/joincap | awk '{print $5}' | tr -d 'kB')
 Description: Merge multiple pcap files together, gracefully.
 EOF
 
