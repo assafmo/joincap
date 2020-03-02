@@ -17,6 +17,7 @@ VERSION=$(git describe --tags $(git rev-list --tags --max-count=1))
 GOOS=linux   GOARCH=amd64 go build -o "release/joincap-linux64-${VERSION}"
 GOOS=windows GOARCH=amd64 go build -o "release/joincap-win64-${VERSION}.exe"
 GOOS=darwin  GOARCH=amd64 go build -o "release/joincap-macos64-${VERSION}"
+GOOS=linux   GOARCH=arm64 go build -o "release/joincap-linux-arm64-${VERSION}"
 
 (
     # zip
