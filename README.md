@@ -111,9 +111,9 @@ When using `tcpslice` or `mergecap` sometimes `pcapfix` is needed to fix bad inp
 
 |              | Version | Speed    | Time     |
 | ------------ | ------- | -------- | -------- |
-| **mergecap** | 2.4.5   | 637MiB/s | 0m5.219s |
-| **tcpslice** | 1.2a3   | 887MiB/s | 0m3.464s |
-| **joincap**  | 0.8.9   | 439MiB/s | 0m6.995s |
+| **mergecap** | 3.2.2   | 590MiB/s | 0m5.632s |
+| **tcpslice** | 1.2a3   | 820MiB/s | 0m3.746s |
+| **joincap**  | 0.10.1  | 414MiB/s | 0m7.408s |
 
 - Merging 3 files with total size of 2.99994GiB.
-- Running on Linux 4.15.0-22-generic, with Intel(R) Core(TM) i5-8250U CPU @ 1.60GHz (with SSE4.2), with 7873 MB of physical memory, with locale C, with zlib 1.2.11.
+- Running on Linux 5.4.0-21-generic, with Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz (with SSE4.2), with 31765 MB of physical memory, with locale C, with zlib 1.2.11.
