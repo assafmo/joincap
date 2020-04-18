@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.10.2 (Apr 18, 2020)
+
+- use ZeroCopyReadPacketData which is much faster than ReadPacketData
+
 ## v0.10.1 (Feb 19, 2019)
 
 - print help messege if no input files were given
