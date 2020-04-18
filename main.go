@@ -28,7 +28,7 @@ import (
 	flags "github.com/jessevdk/go-flags"
 )
 
-const version = "0.10.1"
+const version = "0.10.2"
 const maxSnaplen uint32 = 262144
 
 // previousTimestamp is the timestamp of the previous packet popped from the heap.
