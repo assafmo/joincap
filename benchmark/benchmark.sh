@@ -3,7 +3,10 @@
 BENCHMARK_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # get pcaps
-( cd "$BENCHMARK_DIR" ; wget -nc https://download.netresec.com/pcap/maccdc-2012/maccdc2012_0000{0,1,2}.pcap.gz 2> /dev/null )
+( 
+    cd "$BENCHMARK_DIR"
+    wget -nc https://download.netresec.com/pcap/maccdc-2012/maccdc2012_0000{0,1,2}.pcap.gz 2> /dev/null
+)
 
 # extract pcaps
 if [[ ! -f "$BENCHMARK_DIR"/0.pcap ]]; then
@@ -44,8 +47,12 @@ if [[ "$TO_MARKDOWN" == "true" ]]; then
 
     echo
     echo joincap:
-    joincap --version
-    time joincap "$PCAPS_DIR"/*pcap | pv -fab 2>&1 >/dev/null | tail -1
+    (
+        cd "$BENCHMARK_DIR/.."
+        go build
+        ./joincap --version
+        time ./joincap "$PCAPS_DIR"/*pcap | pv -fab 2>&1 >/dev/null | tail -1
+    )
 else
     echo mergecap:
     mergecap --version
@@ -58,8 +65,12 @@ else
 
     echo
     echo joincap:
-    joincap --version
-    time joincap "$PCAPS_DIR"/*pcap | pv -f >/dev/null
+    (
+        cd "$BENCHMARK_DIR/.."
+        go build
+        ./joincap --version
+        time ./joincap "$PCAPS_DIR"/*pcap | pv -f >/dev/null
+    )
 fi
 
 if [[ $(free -m | awk '/Mem/{print $2}') -gt 6000 ]]; then
