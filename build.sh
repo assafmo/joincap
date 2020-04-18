@@ -4,8 +4,6 @@
 set -e
 set -v
 
-go get -v -u -t -d ./...
-
 go test -race -cover ./...
 
 rm -rf release
@@ -45,4 +43,5 @@ Description: Merge multiple pcap files together, gracefully.
 EOF
 
     dpkg-deb --build ./deb/ .
+    rm -rf ./deb
 )
