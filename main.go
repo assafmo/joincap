@@ -220,7 +220,7 @@ func initHeapWithInputFiles(inputFilePaths []string, minTimeHeap *minheap.Packet
 
 func readNext(reader *pcapgo.Reader, inputFile *os.File, verbose bool, isInit bool) (minheap.Packet, error) {
 	for {
-		data, captureInfo, err := reader.ReadPacketData()
+		data, captureInfo, err := reader.ZeroCopyReadPacketData()
 		if err != nil {
 			if err == io.EOF {
 				// Done with this source
