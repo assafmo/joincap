@@ -28,7 +28,7 @@ import (
 	flags "github.com/jessevdk/go-flags"
 )
 
-const version = "0.10.2"
+const version = "0.11.0"
 const maxSnaplen uint32 = 262144
 
 // previousTimestamp is the timestamp of the previous packet popped from the heap.
@@ -48,6 +48,7 @@ func joincap(args []string) error {
 	var cmdFlags struct {
 		Verbose        bool   `short:"v" long:"verbose" description:"Explain when skipping packets or input files"`
 		Version        bool   `short:"V" long:"version" description:"Print the version and exit"`
+		Precision      string `short:"p" choice:"micros" choice:"nanos" default:"micros" description:"Sets timestamp precision"`
 		OutputFilePath string `short:"w" default:"-" description:"Sets the output filename. If the name is '-', stdout will be used"`
 		Rest           struct {
 			InFiles []string
@@ -109,7 +110,13 @@ func joincap(args []string) error {
 		log.Printf("writing to %s\n", outputFile.Name())
 	}
 
-	writer := pcapgo.NewWriter(bufferedFileWriter)
+	var writer *pcapgo.Writer
+
+	if cmdFlags.Precision == "nanos" {
+		writer = pcapgo.NewWriterNanos(bufferedFileWriter)
+	} else {
+		writer = pcapgo.NewWriter(bufferedFileWriter)
+	}
 	writer.WriteFileHeader(maxSnaplen, linkType)
 
 	// Main loop
