@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"io"
 	"io/ioutil"
 	"os"
@@ -845,6 +846,33 @@ func TestInputFilePassingOrderDoesNotMatter(t *testing.T) {
 
 	if packetCount(t, outputFile2.Name()) != bigCount+littleCount {
 		t.Fatal("error counting")
+	}
+}
+
+// TestNanos timestamp precision of merged pcap
+func TestNanos(t *testing.T) {
+	outputFile, err := ioutil.TempFile("", "joincap_output_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFile.Close()
+	defer os.Remove(outputFile.Name())
+
+	err = joincap([]string{"joincap",
+		"-v", "-w", outputFile.Name(),
+		"-p", "nanos",
+		okPcap})
+	if err != nil {
+		t.Fatal(err)
+	}
+	pcapMagicNumber := make([]byte, 4)
+	// https://www.tcpdump.org/manpages/pcap-savefile.5.html
+	// Need to consider other endianness []byte{0xa1, 0xb2, 0x3c, 0x4d}
+	nanosMagicNumber := []byte{0x4d, 0x3c, 0xb2, 0xa1}
+	file, err := os.Open(outputFile.Name())
+	_, err = file.Read(pcapMagicNumber)
+	if !bytes.Equal(pcapMagicNumber, nanosMagicNumber) {
+		t.Fatalf("Magic number should be %x found %x", nanosMagicNumber, pcapMagicNumber)
 	}
 }
 
