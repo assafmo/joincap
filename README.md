@@ -32,13 +32,14 @@ Usage:
   joincap [OPTIONS] InFiles...
 
 Application Options:
-  -v, --verbose  Explain when skipping packets or entire input files
-  -V, --version  Print the version and exit
-  -w=            Sets the output filename. If the name is '-', stdout will be used (default: -)
-  -c=            An integer argument for limiting the pcap size (default: 9223372036854775807)
+  -v, --verbose        Explain when skipping packets or entire input files
+  -V, --version        Print the version and exit
+  -w=                  Sets the output filename. If the name is '-', stdout will be used (default: -)
+  -c=                  An integer argument for limiting the pcap size (default: 9223372036854775807)
+  -p=[micros|nanos]    Sets timestamp precision (default: micros)
 
 Help Options:
-  -h, --help     Show this help message
+  -h, --help            Show this help message
 ```
 
 ## Why?
