@@ -32,12 +32,13 @@ Usage:
   joincap [OPTIONS] InFiles...
 
 Application Options:
-  -v, --verbose  Explain when skipping packets or entire input files
-  -V, --version  Print the version and exit
-  -w=            Sets the output filename. If the name is '-', stdout will be used (default: -)
+  -v, --verbose         Explain when skipping packets or input files
+  -V, --version         Print the version and exit
+  -p=[micros|nanos]     Sets timestamp precision (default: micros)
+  -w=                   Sets the output filename. If the name is '-', stdout will be used (default: -)
 
 Help Options:
-  -h, --help     Show this help message
+  -h, --help            Show this help message
 ```
 
 ## Why?
