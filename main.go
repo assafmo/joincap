@@ -1,15 +1,15 @@
 // Merge multiple pcap files together, gracefully.
 //
-//  Usage:
-//    joincap [OPTIONS] InFiles...
+//		 Usage:
+//		   joincap [OPTIONS] InFiles...
 //
-//  Application Options:
-//    -v, --verbose  Explain when skipping packets or entire input files
-//    -V, --version  Print the version and exit
-//    -w=            Sets the output filename. If the name is '-', stdout will be used (default: -)
+//		 Application Options:
+//		   -v, --verbose  Explain when skipping packets or entire input files
+//		   -V, --version  Print the version and exit
+//		   -w=            Sets the output filename. If the name is '-', stdout will be used (default: -)
 //
-//  Help Options:
-//    -h, --help     Show this help message
+//	 Help Options:
+//	   -h, --help     Show this help message
 package main
 
 import (
@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"os"
 	"time"
 
@@ -49,11 +50,12 @@ func joincap(args []string) error {
 		Verbose        bool   `short:"v" long:"verbose" description:"Explain when skipping packets or input files"`
 		Version        bool   `short:"V" long:"version" description:"Print the version and exit"`
 		OutputFilePath string `short:"w" default:"-" description:"Sets the output filename. If the name is '-', stdout will be used"`
+		Count          int    `short:"c" description:"A positive integer argument for limiting the number of packets"`
 		Rest           struct {
 			InFiles []string
 		} `positional-args:"yes" required:"yes"`
 	}
-
+	cmdFlags.Count = math.MaxInt
 	_, err := flags.ParseArgs(&cmdFlags, args)
 
 	if err != nil {
@@ -82,6 +84,16 @@ func joincap(args []string) error {
 
 	if cmdFlags.Verbose {
 		log.Printf("joincap v%s - https://github.com/assafmo/joincap\n", version)
+	}
+
+	if cmdFlags.Count < 0 {
+		if cmdFlags.Verbose {
+			log.Printf("Limiting number of packets to 0 packets\n")
+		}
+	} else if cmdFlags.Count != math.MaxInt {
+		if cmdFlags.Verbose {
+			log.Printf("Limiting number of packets to %d packets\n", cmdFlags.Count)
+		}
 	}
 
 	// Init a minimum heap by packet timestamp
@@ -115,14 +127,21 @@ func joincap(args []string) error {
 	// Main loop
 	for minTimeHeap.Len() > 0 {
 		// Find the earliest packet and write it to the output file
+		if cmdFlags.Count != math.MaxInt && cmdFlags.Count <= 0 {
+			break
+		}
 		earliestPacket := heap.Pop(&minTimeHeap).(minheap.Packet)
 		write(writer, earliestPacket, cmdFlags.Verbose)
+		cmdFlags.Count--
 
 		var earliestHeapTime int64
 		if minTimeHeap.Len() > 0 {
 			earliestHeapTime = minTimeHeap[0].Timestamp
 		}
 		for {
+			if cmdFlags.Count != math.MaxInt && cmdFlags.Count <= 0 {
+				break
+			}
 			// Read the next packet from the source of the last written packet
 			nextPacket, err := readNext(
 				earliestPacket.Reader,
@@ -138,6 +157,7 @@ func joincap(args []string) error {
 				// This is the earliest packet, write it to the output file
 				// (Skip pushing it to the heap. This is much faster)
 				write(writer, nextPacket, cmdFlags.Verbose)
+				cmdFlags.Count--
 				continue
 			}
 

@@ -389,6 +389,47 @@ func TestGzippedPcap(t *testing.T) {
 	}
 }
 
+// TestPacketLimit merged pcap should be limited to number packets passed with -c argument
+func TestPacketLimit(t *testing.T) {
+	outputFile, err := ioutil.TempFile("", "joincap_output_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFile.Close()
+	defer os.Remove(outputFile.Name())
+
+	testInputs := [][]string{{"joincap",
+		"-v", "-w", outputFile.Name(),
+		"-c", "-1",
+		"test_pcaps/ok.pcap.gz", okPcap},
+		{"joincap",
+			"-v", "-w", outputFile.Name(),
+			"-c", "200",
+			"test_pcaps/ok.pcap.gz", okPcap},
+		{"joincap",
+			"-v", "-w", outputFile.Name(),
+			"-c", "1",
+			"test_pcaps/ok.pcap.gz", okPcap},
+		{"joincap",
+			"-v", "-w", outputFile.Name(),
+			"test_pcaps/ok.pcap.gz", okPcap},
+	}
+	testOutputs := []uint64{0, 200, 1, 1702}
+	for i, tests := range testInputs {
+		err = joincap(tests)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		count := packetCount(t, outputFile.Name())
+		if count != testOutputs[i] {
+			t.Fatalf("error limiting the packets, expected packets: %d, actual packets %d",
+				testOutputs[i], count)
+		}
+	}
+
+}
+
 // TestNormalOutputSnaplenOnSmallInputSnaplen input snaplen should be ignored and we use our own snaplen
 func TestNormalOutputSnaplenOnSmallInputSnaplen(t *testing.T) {
 	outputFile, err := ioutil.TempFile("", "joincap_output_")
