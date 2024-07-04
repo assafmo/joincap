@@ -413,8 +413,12 @@ func TestPacketLimit(t *testing.T) {
 		{"joincap",
 			"-v", "-w", outputFile.Name(),
 			"test_pcaps/ok.pcap.gz", okPcap},
+		{"joincap",
+			"-v", "-w", outputFile.Name(),
+			"-c", "0",
+			"test_pcaps/ok.pcap.gz", okPcap},
 	}
-	testOutputs := []uint64{0, 200, 1, 1702}
+	testOutputs := []uint64{1702, 200, 1, 1702, 1702}
 	for i, tests := range testInputs {
 		err = joincap(tests)
 		if err != nil {
@@ -423,8 +427,7 @@ func TestPacketLimit(t *testing.T) {
 
 		count := packetCount(t, outputFile.Name())
 		if count != testOutputs[i] {
-			t.Fatalf("error limiting the packets, expected packets: %d, actual packets %d",
-				testOutputs[i], count)
+			t.Fatalf("error limiting the packets, Testcase: %d, expected packets: %d, actual packets %d", testOutputs[i], count, i)
 		}
 	}
 
