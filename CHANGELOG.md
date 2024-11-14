@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.11.0 (Nov 14, 2024)
+
+- add flag -p for timestamp precision in nanoseconds
+
 ## v0.10.2 (Apr 18, 2020)
 
 - use ZeroCopyReadPacketData which is much faster than ReadPacketData
