@@ -22,6 +22,8 @@ import (
 	"log"
 	"math"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/assafmo/joincap/minheap"
@@ -31,8 +33,10 @@ import (
 	flags "github.com/jessevdk/go-flags"
 )
 
-const version = "0.11.0"
-const maxSnaplen uint32 = 262144
+const (
+	version           = "0.11.0"
+	maxSnaplen uint32 = 262144
+)
 
 // previousTimestamp is the timestamp of the previous packet popped from the heap.
 // It helps us find bad/corrupted packets with weird timestamps.
@@ -62,7 +66,6 @@ func joincap(args []string) error {
 	}
 	cmdFlags.Count = math.MaxInt
 	_, err := flags.ParseArgs(&cmdFlags, args)
-
 	if err != nil {
 		flagsErr, ok := err.(*flags.Error)
 		if ok && flagsErr.Type == flags.ErrHelp {
@@ -196,6 +199,51 @@ func printVersionSloganLink() {
 	fmt.Println("For more info visit https://github.com/assafmo/joincap")
 }
 
+// ExpandWildcards takes a list of file paths that may contain wildcards
+// and returns a new list with wildcards expanded to matching file paths.
+// If a wildcard pattern doesn't match any files, it's skipped.
+// If verbose is true, information about skipped patterns is logged.
+func ExpandWildcards(inputPaths []string, verbose bool) []string {
+	var expandedPaths []string
+
+	// Expand wildcards in file paths
+	for _, inputPath := range inputPaths {
+		// Check if the path contains wildcards
+		if containsWildcard(inputPath) {
+			matches, err := filepath.Glob(inputPath)
+			if err != nil {
+				if verbose {
+					log.Printf("%s: %v (skipping this pattern)\n", inputPath, err)
+				}
+				continue
+			}
+
+			if len(matches) == 0 {
+				if verbose {
+					log.Printf("%s: no matching files found (skipping this pattern)\n", inputPath)
+				}
+				continue
+			}
+
+			expandedPaths = append(expandedPaths, matches...)
+		} else {
+			expandedPaths = append(expandedPaths, inputPath)
+		}
+	}
+
+	// If no paths were expanded, use the original paths
+	if len(expandedPaths) == 0 {
+		expandedPaths = inputPaths
+	}
+
+	return expandedPaths
+}
+
+// Helper function to check if a path contains wildcards
+func containsWildcard(path string) bool {
+	return strings.ContainsAny(path, "*?[]")
+}
+
 // initHeapWithInputFiles inits minTimeHeap with one packet from each source file.
 // It also returns the output LinkType, which is decided by the LinkTypes of all of the
 // input files.
@@ -203,7 +251,10 @@ func initHeapWithInputFiles(inputFilePaths []string, minTimeHeap *minheap.Packet
 	var totalInputSizeBytes int64
 	var linkType layers.LinkType
 
-	for _, inputPcapPath := range inputFilePaths {
+	// Expand wildcards in input file paths
+	expandedPaths := ExpandWildcards(inputFilePaths, verbose)
+
+	for _, inputPcapPath := range expandedPaths {
 		// Read the first packet and push it to the heap
 		inputFile, err := os.Open(inputPcapPath)
 		if err != nil {
