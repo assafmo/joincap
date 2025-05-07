@@ -134,7 +134,10 @@ func joincap(args []string) error {
 	} else {
 		writer = pcapgo.NewWriter(bufferedFileWriter)
 	}
-	writer.WriteFileHeader(maxSnaplen, linkType)
+	err = writer.WriteFileHeader(maxSnaplen, linkType)
+	if err != nil {
+		return fmt.Errorf("failed to write pcap header: %v", err)
+	}
 
 	// Main loop
 	for minTimeHeap.Len() > 0 {
