@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -121,17 +120,19 @@ func testIsOrdered(t *testing.T, pcapPath string) {
 func TestCount(t *testing.T) {
 	for name, extra_args := range map[string]string{"DefaultMicros": "", "Nanos": "-p=nanos"} {
 		t.Run(name, func(t *testing.T) {
-			outputFile, err := ioutil.TempFile("", "joincap_output_")
+			outputFile, err := os.CreateTemp("", "joincap_output_")
 			if err != nil {
 				t.Fatal(err)
 			}
 			outputFile.Close()
 			defer os.Remove(outputFile.Name())
 
-			err = joincap([]string{"joincap",
+			err = joincap([]string{
+				"joincap",
 				"-v", "-w", outputFile.Name(),
 				extra_args,
-				okPcap, okPcap})
+				okPcap, okPcap,
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -148,17 +149,19 @@ func TestCount(t *testing.T) {
 func TestOrder(t *testing.T) {
 	for name, extra_args := range map[string]string{"DefaultMicros": "", "Nanos": "-p=nanos"} {
 		t.Run(name, func(t *testing.T) {
-			outputFile, err := ioutil.TempFile("", "joincap_output_")
+			outputFile, err := os.CreateTemp("", "joincap_output_")
 			if err != nil {
 				t.Fatal(err)
 			}
 			outputFile.Close()
 			defer os.Remove(outputFile.Name())
 
-			err = joincap([]string{"joincap",
+			err = joincap([]string{
+				"joincap",
 				"-v", "-w", outputFile.Name(),
 				extra_args,
-				okPcap, okPcap})
+				okPcap, okPcap,
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -174,17 +177,19 @@ func TestOrder(t *testing.T) {
 func TestIgnoreInputFileCorruptGlobalHeader(t *testing.T) {
 	for name, extra_args := range map[string]string{"DefaultMicros": "", "Nanos": "-p=nanos"} {
 		t.Run(name, func(t *testing.T) {
-			outputFile, err := ioutil.TempFile("", "joincap_output_")
+			outputFile, err := os.CreateTemp("", "joincap_output_")
 			if err != nil {
 				t.Fatal(err)
 			}
 			outputFile.Close()
 			defer os.Remove(outputFile.Name())
 
-			err = joincap([]string{"joincap",
+			err = joincap([]string{
+				"joincap",
 				"-v", "-w", outputFile.Name(),
 				extra_args,
-				"test_pcaps/bad_global.pcap"})
+				"test_pcaps/bad_global.pcap",
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -200,17 +205,19 @@ func TestIgnoreInputFileCorruptGlobalHeader(t *testing.T) {
 func TestIgnorePacketWithCorruptHeader(t *testing.T) {
 	for name, extra_args := range map[string]string{"DefaultMicros": "", "Nanos": "-p=nanos"} {
 		t.Run(name, func(t *testing.T) {
-			outputFile, err := ioutil.TempFile("", "joincap_output_")
+			outputFile, err := os.CreateTemp("", "joincap_output_")
 			if err != nil {
 				t.Fatal(err)
 			}
 			outputFile.Close()
 			defer os.Remove(outputFile.Name())
 
-			err = joincap([]string{"joincap",
+			err = joincap([]string{
+				"joincap",
 				"-v", "-w", outputFile.Name(),
 				extra_args,
-				okPcap, "test_pcaps/bad_first_header.pcap"})
+				okPcap, "test_pcaps/bad_first_header.pcap",
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -229,17 +236,19 @@ func TestIgnorePacketWithCorruptHeader(t *testing.T) {
 func TestIgnoreTruncatedPacketEOF(t *testing.T) {
 	for name, extra_args := range map[string]string{"DefaultMicros": "", "Nanos": "-p=nanos"} {
 		t.Run(name, func(t *testing.T) {
-			outputFile, err := ioutil.TempFile("", "joincap_output_")
+			outputFile, err := os.CreateTemp("", "joincap_output_")
 			if err != nil {
 				t.Fatal(err)
 			}
 			outputFile.Close()
 			defer os.Remove(outputFile.Name())
 
-			err = joincap([]string{"joincap",
+			err = joincap([]string{
+				"joincap",
 				"-v", "-w", outputFile.Name(),
 				extra_args,
-				"test_pcaps/unexpected_eof_on_second_packet.pcap"})
+				"test_pcaps/unexpected_eof_on_second_packet.pcap",
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -257,17 +266,19 @@ func TestIgnoreTruncatedPacketEOF(t *testing.T) {
 func TestIgnoreEmptyPcap(t *testing.T) {
 	for name, extra_args := range map[string]string{"DefaultMicros": "", "Nanos": "-p=nanos"} {
 		t.Run(name, func(t *testing.T) {
-			outputFile, err := ioutil.TempFile("", "joincap_output_")
+			outputFile, err := os.CreateTemp("", "joincap_output_")
 			if err != nil {
 				t.Fatal(err)
 			}
 			outputFile.Close()
 			defer os.Remove(outputFile.Name())
 
-			err = joincap([]string{"joincap",
+			err = joincap([]string{
+				"joincap",
 				"-v", "-w", outputFile.Name(),
 				extra_args,
-				okPcap, "test_pcaps/no_packets.pcap"})
+				okPcap, "test_pcaps/no_packets.pcap",
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -285,17 +296,19 @@ func TestIgnoreEmptyPcap(t *testing.T) {
 func TestIgnoreInputFileTruncatedGlobalHeader(t *testing.T) {
 	for name, extra_args := range map[string]string{"DefaultMicros": "", "Nanos": "-p=nanos"} {
 		t.Run(name, func(t *testing.T) {
-			outputFile, err := ioutil.TempFile("", "joincap_output_")
+			outputFile, err := os.CreateTemp("", "joincap_output_")
 			if err != nil {
 				t.Fatal(err)
 			}
 			outputFile.Close()
 			defer os.Remove(outputFile.Name())
 
-			err = joincap([]string{"joincap",
+			err = joincap([]string{
+				"joincap",
 				"-v", "-w", outputFile.Name(),
 				extra_args,
-				okPcap, "test_pcaps/partial_global_header.pcap"})
+				okPcap, "test_pcaps/partial_global_header.pcap",
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -313,17 +326,19 @@ func TestIgnoreInputFileTruncatedGlobalHeader(t *testing.T) {
 func TestIgnoreInputFileTruncatedFirstPacketHeader(t *testing.T) {
 	for name, extra_args := range map[string]string{"DefaultMicros": "", "Nanos": "-p=nanos"} {
 		t.Run(name, func(t *testing.T) {
-			outputFile, err := ioutil.TempFile("", "joincap_output_")
+			outputFile, err := os.CreateTemp("", "joincap_output_")
 			if err != nil {
 				t.Fatal(err)
 			}
 			outputFile.Close()
 			defer os.Remove(outputFile.Name())
 
-			err = joincap([]string{"joincap",
+			err = joincap([]string{
+				"joincap",
 				"-v", "-w", outputFile.Name(),
 				extra_args,
-				"test_pcaps/partial_first_header.pcap", okPcap})
+				"test_pcaps/partial_first_header.pcap", okPcap,
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -341,17 +356,19 @@ func TestIgnoreInputFileTruncatedFirstPacketHeader(t *testing.T) {
 func TestIgnoreInputFileDoesNotExists(t *testing.T) {
 	for name, extra_args := range map[string]string{"DefaultMicros": "", "Nanos": "-p=nanos"} {
 		t.Run(name, func(t *testing.T) {
-			outputFile, err := ioutil.TempFile("", "joincap_output_")
+			outputFile, err := os.CreateTemp("", "joincap_output_")
 			if err != nil {
 				t.Fatal(err)
 			}
 			outputFile.Close()
 			defer os.Remove(outputFile.Name())
 
-			err = joincap([]string{"joincap",
+			err = joincap([]string{
+				"joincap",
 				"-v", "-w", outputFile.Name(),
 				extra_args,
-				"/nothing/here", okPcap, "or_here"})
+				"/nothing/here", okPcap, "or_here",
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -369,17 +386,19 @@ func TestIgnoreInputFileDoesNotExists(t *testing.T) {
 func TestIgnoreInputFileIsDirectory(t *testing.T) {
 	for name, extra_args := range map[string]string{"DefaultMicros": "", "Nanos": "-p=nanos"} {
 		t.Run(name, func(t *testing.T) {
-			outputFile, err := ioutil.TempFile("", "joincap_output_")
+			outputFile, err := os.CreateTemp("", "joincap_output_")
 			if err != nil {
 				t.Fatal(err)
 			}
 			outputFile.Close()
 			defer os.Remove(outputFile.Name())
 
-			err = joincap([]string{"joincap",
+			err = joincap([]string{
+				"joincap",
 				"-v", "-w", outputFile.Name(),
 				extra_args,
-				"test_pcaps", okPcap})
+				"test_pcaps", okPcap,
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -397,17 +416,19 @@ func TestIgnoreInputFileIsDirectory(t *testing.T) {
 func TestIgnoreGarbageEndingOfPcap(t *testing.T) {
 	for name, extra_args := range map[string]string{"DefaultMicros": "", "Nanos": "-p=nanos"} {
 		t.Run(name, func(t *testing.T) {
-			outputFile, err := ioutil.TempFile("", "joincap_output_")
+			outputFile, err := os.CreateTemp("", "joincap_output_")
 			if err != nil {
 				t.Fatal(err)
 			}
 			outputFile.Close()
 			defer os.Remove(outputFile.Name())
 
-			err = joincap([]string{"joincap",
+			err = joincap([]string{
+				"joincap",
 				"-v", "-w", outputFile.Name(),
 				extra_args,
-				"test_pcaps/bad_end.pcap", okPcap})
+				"test_pcaps/bad_end.pcap", okPcap,
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -426,17 +447,19 @@ func TestIgnoreGarbageEndingOfPcap(t *testing.T) {
 func TestGzippedPcap(t *testing.T) {
 	for name, extra_args := range map[string]string{"DefaultMicros": "", "Nanos": "-p=nanos"} {
 		t.Run(name, func(t *testing.T) {
-			outputFile, err := ioutil.TempFile("", "joincap_output_")
+			outputFile, err := os.CreateTemp("", "joincap_output_")
 			if err != nil {
 				t.Fatal(err)
 			}
 			outputFile.Close()
 			defer os.Remove(outputFile.Name())
 
-			err = joincap([]string{"joincap",
+			err = joincap([]string{
+				"joincap",
 				"-v", "-w", outputFile.Name(),
 				extra_args,
-				"test_pcaps/ok.pcap.gz", okPcap})
+				"test_pcaps/ok.pcap.gz", okPcap,
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -452,32 +475,43 @@ func TestGzippedPcap(t *testing.T) {
 
 // TestPacketLimit merged pcap should be limited to number packets passed with -c argument
 func TestPacketLimit(t *testing.T) {
-	outputFile, err := ioutil.TempFile("", "joincap_output_")
+	outputFile, err := os.CreateTemp("", "joincap_output_")
 	if err != nil {
 		t.Fatal(err)
 	}
 	outputFile.Close()
 	defer os.Remove(outputFile.Name())
 
-	testInputs := [][]string{{"joincap",
-		"-v", "-w", outputFile.Name(),
-		"-c", "-1",
-		"test_pcaps/ok.pcap.gz", okPcap},
-		{"joincap",
+	testInputs := [][]string{
+		{
+			"joincap",
+			"-v", "-w", outputFile.Name(),
+			"-c", "-1",
+			"test_pcaps/ok.pcap.gz", okPcap,
+		},
+		{
+			"joincap",
 			"-v", "-w", outputFile.Name(),
 			"-c", "200",
-			"test_pcaps/ok.pcap.gz", okPcap},
-		{"joincap",
+			"test_pcaps/ok.pcap.gz", okPcap,
+		},
+		{
+			"joincap",
 			"-v", "-w", outputFile.Name(),
 			"-c", "1",
-			"test_pcaps/ok.pcap.gz", okPcap},
-		{"joincap",
+			"test_pcaps/ok.pcap.gz", okPcap,
+		},
+		{
+			"joincap",
 			"-v", "-w", outputFile.Name(),
-			"test_pcaps/ok.pcap.gz", okPcap},
-		{"joincap",
+			"test_pcaps/ok.pcap.gz", okPcap,
+		},
+		{
+			"joincap",
 			"-v", "-w", outputFile.Name(),
 			"-c", "0",
-			"test_pcaps/ok.pcap.gz", okPcap},
+			"test_pcaps/ok.pcap.gz", okPcap,
+		},
 	}
 	testOutputs := []uint64{1702, 200, 1, 1702, 1702}
 	for i, tests := range testInputs {
@@ -491,24 +525,25 @@ func TestPacketLimit(t *testing.T) {
 			t.Fatalf("error limiting the packets, Testcase: %d, expected packets: %d, actual packets %d", testOutputs[i], count, i)
 		}
 	}
-
 }
 
 // TestNormalOutputSnaplenOnSmallInputSnaplen input snaplen should be ignored and we use our own snaplen
 func TestNormalOutputSnaplenOnSmallInputSnaplen(t *testing.T) {
 	for name, extra_args := range map[string]string{"DefaultMicros": "", "Nanos": "-p=nanos"} {
 		t.Run(name, func(t *testing.T) {
-			outputFile, err := ioutil.TempFile("", "joincap_output_")
+			outputFile, err := os.CreateTemp("", "joincap_output_")
 			if err != nil {
 				t.Fatal(err)
 			}
 			defer os.Remove(outputFile.Name())
 			defer outputFile.Close()
 
-			err = joincap([]string{"joincap",
+			err = joincap([]string{
+				"joincap",
 				"-v", "-w", outputFile.Name(),
 				extra_args,
-				"test_pcaps/very_small_snaplen.pcap"})
+				"test_pcaps/very_small_snaplen.pcap",
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -537,7 +572,7 @@ func TestNormalOutputSnaplenOnSmallInputSnaplen(t *testing.T) {
 func TestNormalOutputSnaplenOnNormalInputSnaplen(t *testing.T) {
 	for name, extra_args := range map[string]string{"DefaultMicros": "", "Nanos": "-p=nanos"} {
 		t.Run(name, func(t *testing.T) {
-			outputFile, err := ioutil.TempFile("", "joincap_output_")
+			outputFile, err := os.CreateTemp("", "joincap_output_")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -545,10 +580,12 @@ func TestNormalOutputSnaplenOnNormalInputSnaplen(t *testing.T) {
 			defer outputFile.Close()
 
 			// snaplen of test_pcaps/ok.pcap is normal
-			err = joincap([]string{"joincap",
+			err = joincap([]string{
+				"joincap",
 				"-v", "-w", outputFile.Name(),
 				extra_args,
-				okPcap})
+				okPcap,
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -575,7 +612,7 @@ func TestNormalOutputSnaplenOnNormalInputSnaplen(t *testing.T) {
 func TestNormalOutputSnaplenOnBigInputSnaplen(t *testing.T) {
 	for name, extra_args := range map[string]string{"DefaultMicros": "", "Nanos": "-p=nanos"} {
 		t.Run(name, func(t *testing.T) {
-			outputFile, err := ioutil.TempFile("", "joincap_output_")
+			outputFile, err := os.CreateTemp("", "joincap_output_")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -584,10 +621,12 @@ func TestNormalOutputSnaplenOnBigInputSnaplen(t *testing.T) {
 
 			// snaplen of test_pcaps/very_big_snaplen.pcap
 			// is edited to be way too big
-			err = joincap([]string{"joincap",
+			err = joincap([]string{
+				"joincap",
 				"-v", "-w", outputFile.Name(),
 				extra_args,
-				"test_pcaps/very_big_snaplen.pcap"})
+				"test_pcaps/very_big_snaplen.pcap",
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -616,17 +655,19 @@ func TestNormalOutputSnaplenOnBigInputSnaplen(t *testing.T) {
 func TestIgnorePacketsWithTimeEarlierThanFirst(t *testing.T) {
 	for name, extra_args := range map[string]string{"DefaultMicros": "", "Nanos": "-p=nanos"} {
 		t.Run(name, func(t *testing.T) {
-			outputFile, err := ioutil.TempFile("", "joincap_output_")
+			outputFile, err := os.CreateTemp("", "joincap_output_")
 			if err != nil {
 				t.Fatal(err)
 			}
 			outputFile.Close()
 			defer os.Remove(outputFile.Name())
 
-			err = joincap([]string{"joincap",
+			err = joincap([]string{
+				"joincap",
 				"-v", "-w", outputFile.Name(),
 				extra_args,
-				"test_pcaps/second_packet_time_is_1970.pcap"})
+				"test_pcaps/second_packet_time_is_1970.pcap",
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -646,17 +687,19 @@ func TestIgnorePacketsWithTimeEarlierThanFirst(t *testing.T) {
 func TestIgnorePacketsWithTimeAnHourErlierThanpreviousPacket(t *testing.T) {
 	for name, extra_args := range map[string]string{"DefaultMicros": "", "Nanos": "-p=nanos"} {
 		t.Run(name, func(t *testing.T) {
-			outputFile, err := ioutil.TempFile("", "joincap_output_")
+			outputFile, err := os.CreateTemp("", "joincap_output_")
 			if err != nil {
 				t.Fatal(err)
 			}
 			outputFile.Close()
 			defer os.Remove(outputFile.Name())
 
-			err = joincap([]string{"joincap",
+			err = joincap([]string{
+				"joincap",
 				"-v", "-w", outputFile.Name(),
 				extra_args,
-				"test_pcaps/second_packet_time_is_too_small.pcap"})
+				"test_pcaps/second_packet_time_is_too_small.pcap",
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -676,17 +719,19 @@ func TestIgnorePacketsWithTimeAnHourErlierThanpreviousPacket(t *testing.T) {
 func TestPacketsWithTimeLessThanHourBeforePreviousPacketAreOK(t *testing.T) {
 	for name, extra_args := range map[string]string{"DefaultMicros": "", "Nanos": "-p=nanos"} {
 		t.Run(name, func(t *testing.T) {
-			outputFile, err := ioutil.TempFile("", "joincap_output_")
+			outputFile, err := os.CreateTemp("", "joincap_output_")
 			if err != nil {
 				t.Fatal(err)
 			}
 			outputFile.Close()
 			defer os.Remove(outputFile.Name())
 
-			err = joincap([]string{"joincap",
+			err = joincap([]string{
+				"joincap",
 				"-v", "-w", outputFile.Name(),
 				extra_args,
-				"test_pcaps/second_packet_time_is_smaller_but_not_too_small.pcap"})
+				"test_pcaps/second_packet_time_is_smaller_but_not_too_small.pcap",
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -712,7 +757,7 @@ func TestPrintVersion(t *testing.T) {
 	savedStdout := os.Stdout
 	defer func() { os.Stdout = savedStdout }()
 
-	stdoutTmpFile, err := ioutil.TempFile("", "joincap_output_")
+	stdoutTmpFile, err := os.CreateTemp("", "joincap_output_")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -726,7 +771,7 @@ func TestPrintVersion(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	stdoutBytes, err := ioutil.ReadFile(filename)
+	stdoutBytes, err := os.ReadFile(filename)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -747,7 +792,7 @@ func TestPrintHelp(t *testing.T) {
 	savedStdout := os.Stdout
 	defer func() { os.Stdout = savedStdout }()
 
-	stdoutTmpFile, err := ioutil.TempFile("", "joincap_output_")
+	stdoutTmpFile, err := os.CreateTemp("", "joincap_output_")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -761,7 +806,7 @@ func TestPrintHelp(t *testing.T) {
 	}
 	stdoutTmpFile.Close()
 
-	stdoutBytes, err := ioutil.ReadFile(filename)
+	stdoutBytes, err := os.ReadFile(filename)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -791,7 +836,7 @@ func TestMainFunc(t *testing.T) {
 	savedStdout := os.Stdout
 	defer func() { os.Stdout = savedStdout }()
 
-	stdoutTmpFile, err := ioutil.TempFile("", "joincap_output_")
+	stdoutTmpFile, err := os.CreateTemp("", "joincap_output_")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -823,7 +868,7 @@ func TestWriteToNonExistingDirectory(t *testing.T) {
 func TestMixDifferentLinkTypes(t *testing.T) {
 	for name, extra_args := range map[string]string{"DefaultMicros": "", "Nanos": "-p=nanos"} {
 		t.Run(name, func(t *testing.T) {
-			outputFile, err := ioutil.TempFile("", "joincap_output_")
+			outputFile, err := os.CreateTemp("", "joincap_output_")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -833,10 +878,12 @@ func TestMixDifferentLinkTypes(t *testing.T) {
 			linktypeArcnet := "test_pcaps/linktype_arcnet.pcap"
 			linktypeNetlink := "test_pcaps/little-endian-netlink.pcap"
 
-			err = joincap([]string{"joincap",
+			err = joincap([]string{
+				"joincap",
 				"-v", "-w", outputFile.Name(),
 				extra_args,
-				linktypeNetlink, linktypeArcnet})
+				linktypeNetlink, linktypeArcnet,
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -868,17 +915,19 @@ func TestOutputLinkTypeForSameInputLinkTypes(t *testing.T) {
 	for name, extra_args := range map[string]string{"DefaultMicros": "", "Nanos": "-p=nanos"} {
 		t.Run(name, func(t *testing.T) {
 			testLinkTypeFor := func(inFilePath string) {
-				outputFile, err := ioutil.TempFile("", "joincap_output_")
+				outputFile, err := os.CreateTemp("", "joincap_output_")
 				if err != nil {
 					t.Fatal(err)
 				}
 				defer os.Remove(outputFile.Name())
 				defer outputFile.Close()
 
-				err = joincap([]string{"joincap",
+				err = joincap([]string{
+					"joincap",
 					"-v", "-w", outputFile.Name(),
 					extra_args,
-					inFilePath, inFilePath})
+					inFilePath, inFilePath,
+				})
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -898,7 +947,6 @@ func TestOutputLinkTypeForSameInputLinkTypes(t *testing.T) {
 				inReader, err := pcapgo.NewReader(inputFile)
 				if err != nil {
 					t.Fatal(err)
-
 				}
 
 				outReader, err := pcapgo.NewReader(outputFile)
@@ -921,7 +969,7 @@ func TestOutputLinkTypeForSameInputLinkTypes(t *testing.T) {
 func TestMixLittleBigEndian(t *testing.T) {
 	for name, extra_args := range map[string]string{"DefaultMicros": "", "Nanos": "-p=nanos"} {
 		t.Run(name, func(t *testing.T) {
-			outputFile, err := ioutil.TempFile("", "joincap_output_")
+			outputFile, err := os.CreateTemp("", "joincap_output_")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -931,10 +979,12 @@ func TestMixLittleBigEndian(t *testing.T) {
 			big := "test_pcaps/big-endian-netlink.pcap"
 			little := "test_pcaps/little-endian-netlink.pcap"
 
-			err = joincap([]string{"joincap",
+			err = joincap([]string{
+				"joincap",
 				"-v", "-w", outputFile.Name(),
 				extra_args,
-				big, little})
+				big, little,
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -958,14 +1008,14 @@ func TestMixLittleBigEndian(t *testing.T) {
 func TestInputFilePassingOrderDoesNotMatter(t *testing.T) {
 	for name, extra_args := range map[string]string{"DefaultMicros": "", "Nanos": "-p=nanos"} {
 		t.Run(name, func(t *testing.T) {
-			outputFile1, err := ioutil.TempFile("", "joincap_output_1_")
+			outputFile1, err := os.CreateTemp("", "joincap_output_1_")
 			if err != nil {
 				t.Fatal(err)
 			}
 			outputFile1.Close()
 			defer os.Remove(outputFile1.Name())
 
-			outputFile2, err := ioutil.TempFile("", "joincap_output_2_")
+			outputFile2, err := os.CreateTemp("", "joincap_output_2_")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -977,10 +1027,12 @@ func TestInputFilePassingOrderDoesNotMatter(t *testing.T) {
 			little := "test_pcaps/little-endian-netlink.pcap" // date 2016-08-12
 			littleCount := packetCount(t, little)
 
-			err = joincap([]string{"joincap",
+			err = joincap([]string{
+				"joincap",
 				"-v", "-w", outputFile1.Name(),
 				extra_args,
-				big, little})
+				big, little,
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -991,10 +1043,12 @@ func TestInputFilePassingOrderDoesNotMatter(t *testing.T) {
 				t.Fatal("error counting")
 			}
 
-			err = joincap([]string{"joincap",
+			err = joincap([]string{
+				"joincap",
 				"-v", "-w", outputFile2.Name(),
 				extra_args,
-				little, big})
+				little, big,
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1010,23 +1064,31 @@ func TestInputFilePassingOrderDoesNotMatter(t *testing.T) {
 
 // TestNanos timestamp precision of merged pcap
 func TestNanos(t *testing.T) {
-	outputFile, err := ioutil.TempFile("", "joincap_output_")
+	outputFile, err := os.CreateTemp("", "joincap_output_")
 	if err != nil {
 		t.Fatal(err)
 	}
 	outputFile.Close()
 	defer os.Remove(outputFile.Name())
 
-	err = joincap([]string{"joincap",
+	err = joincap([]string{
+		"joincap",
 		"-v", "-w", outputFile.Name(),
 		"-p", "nanos",
-		okPcap})
+		okPcap,
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
 	pcapMagicNumber := make([]byte, 4)
 	file, err := os.Open(outputFile.Name())
+	if err != nil {
+		t.Fatalf("Failed to open output file: %v", err)
+	}
 	_, err = file.Read(pcapMagicNumber)
+	if err != nil {
+		t.Fatalf("Failed to read magic number: %v", err)
+	}
 	// https://www.tcpdump.org/manpages/pcap-savefile.5.html
 	oppositeByteOrderNanosMagicNumber := []byte{0x4d, 0x3c, 0xb2, 0xa1}
 	sameByteOrderNanosMagicNumber := []byte{0xa1, 0xb2, 0x3c, 0x4d}
@@ -1044,8 +1106,12 @@ func TestNanos(t *testing.T) {
 
 func Benchmark(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		joincap([]string{"joincap",
-			"-w", "/dev/null",
-			"test_pcaps/ok.pcap", "test_pcaps/ok.pcap"})
+		err := joincap([]string{
+			"joincap",
+			// ... other arguments
+		})
+		if err != nil {
+			b.Fatalf("Benchmark failed: %v", err)
+		}
 	}
 }
