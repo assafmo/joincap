@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.11.1 (May 4, 2025)
+
+- fix wildcard expansion on windows
+
 ## v0.11.0 (Nov 14, 2024)
 
 - add flag -p for timestamp precision in nanoseconds
